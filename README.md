@@ -25,7 +25,7 @@ necessarily the 'things' they are looking for. Doing a better job of mapping tok
 of a search index) to specific things or concepts will help to address this problem.
 
 #Configuration
-
+<pre>
 &lt;fieldType name="text_autophrase" class="solr.TextField" positionIncrementGap="100">
   &lt;analyzer type="index">
     &lt;tokenizer class="solr.StandardTokenizerFactory"/>
@@ -42,7 +42,7 @@ of a search index) to specific things or concepts will help to address this prob
     &lt;filter class="solr.PorterStemFilterFactory"/>
   &lt;/analyzer>
 &lt;/fieldType>
-
+</pre>
 Parameters:
 
 phrases        file containing auto phrases (one per line)
