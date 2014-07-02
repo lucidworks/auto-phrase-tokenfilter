@@ -54,7 +54,8 @@ leading terms in its phrase list, it will be passed on to the next filter unmole
   &lt;/analyzer>
 &lt;/fieldType>
 </pre>
-Parameters:
+
+#Input Parameters:
 
 <table>
 <tr><td>phrases</td><td>file containing auto phrases (one per line)</td><tr>
