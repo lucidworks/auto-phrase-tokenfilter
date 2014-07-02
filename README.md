@@ -35,7 +35,7 @@ the now unmatched tokens that it has collected. If a phrase match completes, tha
 will be emitted to the next filter in the chain.  If a token does not match any of the 
 leading terms in its phrase list, it will be passed on to the next filter unmolested.
 
-##Example scema.xml Configuration
+##Example schema.xml Configuration
 <pre>
 &lt;fieldType name="text_autophrase" class="solr.TextField" positionIncrementGap="100">
   &lt;analyzer type="index">
