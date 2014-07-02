@@ -12,13 +12,13 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
     
     public void testAutoPhrase( ) throws Exception {
     	 final CharArraySet phraseSets = new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(
-   		      "income tax", "tax refund", "property tax", "rear tow bar"
+   		      "income tax", "tax refund", "property tax"
    	     ), false);
     	 
-        // final String input = "what is income tax refund this year now that property tax is high";
-    	final String input = "rear bar";
+        final String input = "what is my income tax refund this year now that my property tax is so high";
         WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
         AutoPhrasingTokenFilter aptf = new AutoPhrasingTokenFilter( TEST_VERSION_CURRENT, wt, phraseSets, false );
+        aptf.setReplaceWhitespaceWith( new Character( '_' ) );
         CharTermAttribute term = aptf.addAttribute(CharTermAttribute.class);
         aptf.reset();
 

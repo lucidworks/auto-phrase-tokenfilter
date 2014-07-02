@@ -16,19 +16,19 @@ public class AutoPhrasingTokenFilterFactory extends TokenFilterFactory implement
     private final boolean ignoreCase;
     private final boolean emitSingleTokens;
     
-	private boolean insertWhiteSpace = true;
+	private String replaceWhitespaceWith = null;
 
 	public AutoPhrasingTokenFilterFactory(Map<String, String> initArgs) {
-		super( initArgs );
-		phraseSetFiles = get(initArgs, "phrases");
-	    ignoreCase = getBoolean( initArgs, "ignoreCase", false);
-	    emitSingleTokens = getBoolean( initArgs, "includeTokens", false );
+      super( initArgs );
+      phraseSetFiles = get(initArgs, "phrases");
+      ignoreCase = getBoolean( initArgs, "ignoreCase", false);
+      emitSingleTokens = getBoolean( initArgs, "includeTokens", false );
 	    
-	    String insertWhiteSpaceArg = initArgs.get( "insertWhitespace" );
-	    if (insertWhiteSpaceArg != null && insertWhiteSpaceArg.equalsIgnoreCase( "false" )) {
-	    	insertWhiteSpace = false;
-	    }
-	}
+	  String replaceWhitespaceArg = initArgs.get( "replaceWhitespaceWith" );
+	  if (replaceWhitespaceArg != null) {
+    	replaceWhitespaceWith = replaceWhitespaceArg;
+      }
+    }
 	
 
 
@@ -43,7 +43,9 @@ public class AutoPhrasingTokenFilterFactory extends TokenFilterFactory implement
 	@Override
 	public TokenStream create( TokenStream input ) {
 		AutoPhrasingTokenFilter autoPhraseFilter = new AutoPhrasingTokenFilter(luceneMatchVersion, input, phraseSets, emitSingleTokens );
-		autoPhraseFilter.setInsertWhitespace( insertWhiteSpace );
+		if (replaceWhitespaceWith != null) {
+		  autoPhraseFilter.setReplaceWhitespaceWith( new Character( replaceWhitespaceWith.charAt( 0 )) );
+		}
 		return autoPhraseFilter;
 	}
 

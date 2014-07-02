@@ -62,7 +62,7 @@ leading terms in its phrase list, it will be passed on to the next filter unmole
 
 <tr><td>includeTokens</td><td>true|false(default) - if true adds single tokens to output</td></tr>
 
-<tr><td>insertWhitespace</td><td>true(default)|false - if false, replaces whitespace in phrase with '_' (underscore)</td></tr>
+<tr><td>replaceWhitespaceWith</td><td>single character to use to replace whitespace in phrase</td></tr>
 </table>
 
 ##Example Test Code:
