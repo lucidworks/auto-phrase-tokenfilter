@@ -13,7 +13,7 @@ The Autophrasing filter can be combined with a synonym filter to handle cases in
 suffix terms in a phrase are synonymous with the phrase, but where other parts of the phrase are
 not. This enables searching within the phrase to occur selectively, rather than randomly.
 
-#Overview
+##Overview
 
 Search engines work by 'inverse' mapping terms or 'tokens' to the documents that contain
 them. Sometimes a single token uniquely describes a real-world entity or thing but in many
@@ -24,7 +24,7 @@ this type of ambiguity - search engines return documents that contain the words 
 necessarily the 'things' they are looking for. Doing a better job of mapping tokens (the 'units'
 of a search index) to specific things or concepts will help to address this problem.
 
-#Algorithm
+##Algorithm
 
 The auto phrase token filter uses a list of phrases that should be kept together as single 
 tokens. As tokens are received by the filter, it keeps a partial phrase that matches 
@@ -35,7 +35,7 @@ the now unmatched tokens that it has collected. If a phrase match completes, tha
 will be emitted to the next filter in the chain.  If a token does not match any of the 
 leading terms in its phrase list, it will be passed on to the next filter unmolested.
 
-#Configuration
+##Example scema.xml Configuration
 <pre>
 &lt;fieldType name="text_autophrase" class="solr.TextField" positionIncrementGap="100">
   &lt;analyzer type="index">
@@ -55,7 +55,7 @@ leading terms in its phrase list, it will be passed on to the next filter unmole
 &lt;/fieldType>
 </pre>
 
-#Input Parameters:
+##Input Parameters:
 
 <table>
 <tr><td>phrases</td><td>file containing auto phrases (one per line)</td><tr>
