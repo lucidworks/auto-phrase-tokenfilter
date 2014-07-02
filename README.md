@@ -62,3 +62,54 @@ leading terms in its phrase list, it will be passed on to the next filter unmole
 
 <tr><td>includeTokens</td><td>true|false(default) - if true adds single tokens to output</td></tr>
 </table>
+
+##Example Test Code:
+
+The following Java code can be used to show what the AutoPhrasingTokenFilter does:
+
+<pre>
+import org.apache.lucene.analysis.core.WhitespaceTokenizer;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.analysis.BaseTokenStreamTestCase;
+import org.apache.lucene.analysis.util.CharArraySet;
+
+...
+
+  public void testAutoPhrase( ) throws Exception {
+    // sets up a list of phrases - Normally this would be supplied by AutoPhrasingTokenFilterFactory
+    final CharArraySet phraseSets = new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(
+        "income tax", "tax refund", "property tax"
+        ), false);
+    	 
+    final String input = "what is my income tax refund this year now that my property tax is so high";
+    WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
+    AutoPhrasingTokenFilter aptf = new AutoPhrasingTokenFilter( TEST_VERSION_CURRENT, wt, phraseSets, false );
+    CharTermAttribute term = aptf.addAttribute(CharTermAttribute.class);
+    aptf.reset();
+
+    boolean hasToken = false;
+    do {
+      hasToken = aptf.incrementToken( );
+      if (hasToken) System.out.println( "token:'" + term.toString( ) + "'" );
+    } while (hasToken);
+  }
+</pre>
+
+This produces the following output:
+
+<pre>
+token:'what'
+token:'is'
+token:'my'
+token:'income tax'
+token:'tax refund'
+token:'this'
+token:'year'
+token:'now'
+token:'that'
+token:'my'
+token:'property tax'
+token:'is'
+token:'so'
+token:'high'
+</pre>
