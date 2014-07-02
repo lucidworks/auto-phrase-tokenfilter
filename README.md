@@ -26,14 +26,14 @@ of a search index) to specific things or concepts will help to address this prob
 
 #Algorithm
 
-The auto phrase token filter uses a list of phrases that should be kept together as single
-tokens. As tokens are received by the filter, it keeps a list of partial phrases that match 
-the beginning one or more phrases in its list. It keeps appending to the phrases in this 
-list as long as at least one phrase continues to match new tokens. If the match breaks before 
-any phrase completes, the filter will replay the now unmatched tokens that it has collected. 
-If a phrase match completes, that phrase will be emitted to the next filter in the chain.  
-If a token does not match any of the leading terms in its phrase list, it will be passed on 
-to the next filter unmolested.
+The auto phrase token filter uses a list of phrases that should be kept together as single 
+tokens. As tokens are received by the filter, it keeps a partial phrase that matches 
+the beginning of one or more phrases in this list.  It will keep appending tokens to this 
+‘match’ phrase as long as at least one phrase in the list continues to match the newly 
+appended tokens. If the match breaks before any phrase completes, the filter will replay 
+the now unmatched tokens that it has collected. If a phrase match completes, that phrase 
+will be emitted to the next filter in the chain.  If a token does not match any of the 
+leading terms in its phrase list, it will be passed on to the next filter unmolested.
 
 #Configuration
 <pre>
