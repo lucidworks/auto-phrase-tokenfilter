@@ -56,6 +56,8 @@ leading terms in its phrase list, it will be passed on to the next filter unmole
 </pre>
 Parameters:
 
-phrases        file containing auto phrases (one per line)
+<table>
+<tr><td>phrases</td><td>file containing auto phrases (one per line)</td><tr>
 
-includeTokens  true|false(default) - if true adds single tokens to output
+<tr><td>includeTokens</td><td>true|false(default) - if true adds single tokens to output</td></tr>
+</table>
