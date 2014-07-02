@@ -51,7 +51,8 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
   
   private char[] lastToken = null;
   private char[] lastEmitted = null;
-	
+
+  private boolean insertWhiteSpace = true;
 	
   public AutoPhrasingTokenFilter(Version matchVersion, TokenStream input, CharArraySet phraseSet, boolean emitSingleTokens ) {
     super(input);
@@ -67,6 +68,10 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
     super( input );
   }
 
+  public void setInsertWhitespace( boolean insertWhitespace ) {
+    this.insertWhiteSpace = insertWhitespace;
+  }
+  
   @Override
   public boolean incrementToken() throws IOException {
     if (!emitSingleTokens && unusedTokens.size() > 0) {
@@ -219,6 +224,9 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
 	
   private void emit( char[] token ) {
 	Log.debug( "emit: " + new String( token ) );
+	if (!insertWhiteSpace) {
+		token = replaceWhiteSpace( token );
+	}
 	CharTermAttribute termAttr = getTermAttribute( );
 	termAttr.setEmpty( );
 	termAttr.append( new StringBuilder( ).append( token ) );
@@ -238,6 +246,20 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
 	if (token.endPos > token.startPos && token.startPos >= 0) {
 	  offAttr.setOffset( token.startPos, token.endPos );
 	}
+  }
+  
+  // replaces whitespace char withn '_'
+  private char[] replaceWhiteSpace( char[] token ) {
+    char[] replaced = new char[ token.length ];
+	for (int i = 0; i < token.length; i++ ) {
+      if (token[i] == ' ' ) {
+        replaced[i] = '_';
+	  }
+      else {
+        replaced[i] = token[i];
+      }
+	}
+	return replaced;
   }
 	
   private CharTermAttribute getTermAttribute( ) {

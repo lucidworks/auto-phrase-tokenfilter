@@ -15,13 +15,22 @@ public class AutoPhrasingTokenFilterFactory extends TokenFilterFactory implement
 	private final String phraseSetFiles;
     private final boolean ignoreCase;
     private final boolean emitSingleTokens;
+    
+	private boolean insertWhiteSpace = true;
 
 	public AutoPhrasingTokenFilterFactory(Map<String, String> initArgs) {
 		super( initArgs );
 		phraseSetFiles = get(initArgs, "phrases");
 	    ignoreCase = getBoolean( initArgs, "ignoreCase", false);
 	    emitSingleTokens = getBoolean( initArgs, "includeTokens", false );
+	    
+	    String insertWhiteSpaceArg = initArgs.get( "insertWhitespace" );
+	    if (insertWhiteSpaceArg != null && insertWhiteSpaceArg.equalsIgnoreCase( "false" )) {
+	    	insertWhiteSpace = false;
+	    }
 	}
+	
+
 
 	@Override
 	public void inform(ResourceLoader loader) throws IOException {
@@ -34,7 +43,8 @@ public class AutoPhrasingTokenFilterFactory extends TokenFilterFactory implement
 	@Override
 	public TokenStream create( TokenStream input ) {
 		AutoPhrasingTokenFilter autoPhraseFilter = new AutoPhrasingTokenFilter(luceneMatchVersion, input, phraseSets, emitSingleTokens );
-	    return autoPhraseFilter;
+		autoPhraseFilter.setInsertWhitespace( insertWhiteSpace );
+		return autoPhraseFilter;
 	}
 
 }

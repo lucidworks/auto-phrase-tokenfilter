@@ -61,6 +61,8 @@ leading terms in its phrase list, it will be passed on to the next filter unmole
 <tr><td>phrases</td><td>file containing auto phrases (one per line)</td><tr>
 
 <tr><td>includeTokens</td><td>true|false(default) - if true adds single tokens to output</td></tr>
+
+<tr><td>insertWhitespace</td><td>true(default)|false - if false, replaces whitespace in phrase with '_' (underscore)</td></tr>
 </table>
 
 ##Example Test Code:
