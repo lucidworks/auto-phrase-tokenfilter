@@ -94,11 +94,13 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
         char[] lastToken = getCurrentBuffer( new char[0] );
         if (currentSetToCheck.contains( lastToken, 0, lastToken.length )) {
           emit( lastToken );
+          currentPhrase.setLength( 0 );
+          return true;
         }
     	else if (!emitSingleTokens) {
           discardCharTokens( currentPhrase, unusedTokens );
           currentSetToCheck = null;
-    	        
+          currentPhrase.setLength( 0 );
           if (unusedTokens.size() > 0) {
             Token aToken = unusedTokens.remove( 0 );
             Log.debug( "emitting putback token");
@@ -106,8 +108,6 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
             return true;
     	  }
         }
-        currentPhrase.setLength( 0 );
-        return true;
       }
       return false;
     }
