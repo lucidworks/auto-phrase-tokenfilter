@@ -92,7 +92,20 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
     if (nextToken == null) {
     	if (lastEmitted == null && (currentPhrase != null && currentPhrase.length() > 0)) {
     		char[] lastToken = getCurrentBuffer( new char[0] );
-            emit( lastToken );
+    		if (currentSetToCheck.contains( lastToken, 0, lastToken.length )) {
+              emit( lastToken );
+    		}
+    		else if (!emitSingleTokens) {
+    	        discardCharTokens( currentPhrase, unusedTokens );
+    	        currentSetToCheck = null;
+    	        
+    	        if (unusedTokens.size() > 0) {
+    	          Token aToken = unusedTokens.remove( 0 );
+    	          Log.debug( "emitting putback token");
+    	          emit( aToken );
+    		      return true;
+    	        }
+    		}
             currentPhrase.setLength( 0 );
             return true;
     	}
