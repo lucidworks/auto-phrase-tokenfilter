@@ -38,25 +38,25 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
   @Override
   public void init( NamedList initArgs ) {
     Log.info( "init ..." );
-	SolrParams params = SolrParams.toSolrParams(initArgs);
-	phraseSetFiles = params.get( "phrases" );
+    SolrParams params = SolrParams.toSolrParams(initArgs);
+    phraseSetFiles = params.get( "phrases" );
 	
-	String pImpl = params.get( "defType" );
-	if (pImpl != null) {
-	  parserImpl = pImpl;
-	}
+    String pImpl = params.get( "defType" );
+    if (pImpl != null) {
+      parserImpl = pImpl;
+    }
   }
 
   @Override
   public QParser createParser( String qStr, SolrParams localParams, SolrParams params,
 			                   SolrQueryRequest req) {
     Log.info( "createParser" );
-	ModifiableSolrParams modparams = new ModifiableSolrParams( params );
-	String modQ = filter( qStr );
+    ModifiableSolrParams modparams = new ModifiableSolrParams( params );
+    String modQ = filter( qStr );
 
-	modparams.set( "q", modQ );
-	return req.getCore().getQueryPlugin( parserImpl )
-	                    .createParser(modQ, localParams, modparams, req);
+    modparams.set( "q", modQ );
+    return req.getCore().getQueryPlugin( parserImpl )
+                        .createParser(modQ, localParams, modparams, req);
   }
 
   private String filter( String qStr ) {	
