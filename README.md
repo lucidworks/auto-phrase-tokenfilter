@@ -49,7 +49,6 @@ leading terms in its phrase list, it will be passed on to the next filter unmole
     &lt;tokenizer class="solr.StandardTokenizerFactory"/>
     &lt;filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true" />
     &lt;filter class="solr.LowerCaseFilterFactory"/>
-    &lt;filter class="com.lucidworks.analysis.AutoPhrasingTokenFilterFactory" phrases="autophrases.txt" includeTokens="false" />
     &lt;filter class="solr.PorterStemFilterFactory"/>
   &lt;/analyzer>
 &lt;/fieldType>
@@ -58,12 +57,40 @@ leading terms in its phrase list, it will be passed on to the next filter unmole
 ##Input Parameters:
 
 <table>
-<tr><td>phrases</td><td>file containing auto phrases (one per line)</td><tr>
-
-<tr><td>includeTokens</td><td>true|false(default) - if true adds single tokens to output</td></tr>
-
-<tr><td>replaceWhitespaceWith</td><td>single character to use to replace whitespace in phrase</td></tr>
+ <tr><td>phrases</td><td>file containing auto phrases (one per line)</td><tr>
+ <tr><td>includeTokens</td><td>true|false(default) - if true adds single tokens to output</td></tr>
+ <tr><td>replaceWhitespaceWith</td><td>single character to use to replace whitespace in phrase</td></tr>
 </table>
+
+##Query Parser Plugin
+
+Due to an issue with Lucene/Solr query parsing, the AutoPhrasingTokenFilter is not effective at query time as
+part of a standard analyzer chain. This is due to the LUCENE-2605 issue in which the query parser sends each token
+to the Analyzer individually and it thus cannot "see" across whitespace boundries. To redress this problem, a wrapper
+QParserPlugin is incuded (AutoPhrasingQParserPlugin) that first isolates query syntax (in place), auto phrases and then 
+restores the query syntax (+/- operators) so that it functions as originally intended. The auto-phrased portions are
+protected from the query parser by replacing whitespace within them with another character ('_'). 
+
+To use it in a SearchHandler, add a queryParser section to solrconfig.xml:
+
+<pre>
+  &lt;queryParser name="autophrasingParser" class="com.lucidworks.analysis.AutoPhrasingQParserPlugin" >
+      &lt;str name="phrases">autophrases.txt&lt/str>
+  &lt;/queryParser> 
+</pre>
+
+And a new search handler that uses the query parser:
+
+<pre>
+  &lt;requestHandler name="/autophrase" class="solr.SearchHandler">
+   &lt;lst name="defaults">
+     &lt;str name="echoParams">explicit&lt;/str>
+     &lt;int name="rows">10&lt;/int>
+     &lt;str name="df">text&lt;/str>
+     &lt;str name="defType">autophrasingParser&lt;/str>
+   &lt;/lst>
+  &lt;/requestHandler>
+</pre>
 
 ##Example Test Code:
 
