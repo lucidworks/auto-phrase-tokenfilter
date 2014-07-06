@@ -12,7 +12,6 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.analysis.util.CharArrayMap;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +53,7 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
 
   private Character replaceWhitespaceWith = null;
 	
-  public AutoPhrasingTokenFilter(Version matchVersion, TokenStream input, CharArraySet phraseSet, boolean emitSingleTokens ) {
+  public AutoPhrasingTokenFilter( Version matchVersion, TokenStream input, CharArraySet phraseSet, boolean emitSingleTokens ) {
     super(input);
     	
     // Convert to CharArrayMap by iterating the char[] strings and
@@ -70,6 +69,17 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
 
   public void setReplaceWhitespaceWith( Character replaceWhitespaceWith ) {
     this.replaceWhitespaceWith = replaceWhitespaceWith;
+  }
+  
+
+  @Override
+  public void reset( )  throws IOException {
+	currentSetToCheck = null;
+	currentPhrase.setLength( 0 );
+	lastToken = null;
+	lastEmitted = null;
+	unusedTokens.clear( );
+	super.reset();
   }
   
   @Override
@@ -91,9 +101,9 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
     char[] nextToken = nextToken( );
     if (nextToken == null) {
       if (lastEmitted == null && (currentPhrase != null && currentPhrase.length() > 0)) {
-        char[] lastToken = getCurrentBuffer( new char[0] );
-        if (currentSetToCheck.contains( lastToken, 0, lastToken.length )) {
-          emit( lastToken );
+        char[] lastTok = getCurrentBuffer( new char[0] );
+        if (currentSetToCheck.contains( lastTok, 0, lastTok.length )) {
+          emit( lastTok );
           currentPhrase.setLength( 0 );
           return true;
         }
