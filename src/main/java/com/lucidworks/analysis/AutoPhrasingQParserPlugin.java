@@ -82,14 +82,14 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
     query = query.replaceAll( "\\+ ", "+" );
     query = query.replaceAll( "\\- ", "-" );
 		
-	return query;
+    return query;
   }
 	
   private String autophrase( String input ) throws IOException {
     WhitespaceTokenizer wt = new WhitespaceTokenizer(Version.LUCENE_46, new StringReader( input ));
     LowerCaseFilter lcf = new LowerCaseFilter(Version.LUCENE_46, wt );
     AutoPhrasingTokenFilter aptf = new AutoPhrasingTokenFilter( Version.LUCENE_46, lcf, phraseSets, false );
-    aptf.setReplaceWhitespaceWith( new Character( '_' ) );
+    aptf.setReplaceWhitespaceWith( new Character( 'x' ) );
     CharTermAttribute term = aptf.addAttribute(CharTermAttribute.class);
     aptf.reset();
         
@@ -104,8 +104,8 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
   @Override
   public void inform(ResourceLoader loader) throws IOException {
     if (phraseSetFiles != null) {
-	  phraseSets = getWordSet(loader, phraseSetFiles, true );
-	}
+      phraseSets = getWordSet(loader, phraseSetFiles, true );
+    }
   }
 	
   private CharArraySet getWordSet( ResourceLoader loader,
@@ -115,15 +115,15 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
 	CharArraySet words = null;
     if (files.size() > 0) {
       // default stopwords list has 35 or so words, but maybe don't make it that
-	  // big to start
-	  words = new CharArraySet( Version.LUCENE_46,
-		                        files.size() * 10, ignoreCase);
-	  for (String file : files) {
-	    List<String> wlist = getLines(loader, file.trim());
-		words.addAll(StopFilter.makeStopSet(Version.LUCENE_46, wlist, ignoreCase));
-	  }
-	}
-	return words;
+      // big to start
+      words = new CharArraySet( Version.LUCENE_46,
+    	                        files.size() * 10, ignoreCase);
+      for (String file : files) {
+        List<String> wlist = getLines(loader, file.trim());
+    	words.addAll(StopFilter.makeStopSet(Version.LUCENE_46, wlist, ignoreCase));
+      }
+    }
+    return words;
   }
 	
   private List<String> getLines(ResourceLoader loader, String resource) throws IOException {
@@ -132,13 +132,13 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
 
   private List<String> splitFileNames(String fileNames) {
     if (fileNames == null)
-	  return Collections.<String>emptyList();
+      return Collections.<String>emptyList();
 
-	List<String> result = new ArrayList<>();
-	for (String file : fileNames.split("(?<!\\\\),")) {
-	  result.add(file.replaceAll("\\\\(?=,)", ""));
-	}
+    List<String> result = new ArrayList<>();
+    for (String file : fileNames.split("(?<!\\\\),")) {
+      result.add(file.replaceAll("\\\\(?=,)", ""));
+    }
 
-	return result;
+    return result;
   }
 }
