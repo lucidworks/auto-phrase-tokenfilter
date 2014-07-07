@@ -152,9 +152,9 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
       if (currentSetToCheck.contains( currentBuffer, 0, currentBuffer.length )) {
         // emit the current phrase
         emit( currentBuffer );
-        currentPhrase.setLength( 0 );
-        		
-        if (phraseMap.keySet().contains( nextToken, 0, nextToken.length )) {
+        currentSetToCheck = remove( currentSetToCheck, currentBuffer );
+
+        if (currentSetToCheck.size() == 0 && phraseMap.keySet().contains( nextToken, 0, nextToken.length )) {
           // get the phrase set for this token, add it to currentPhrasesTocheck
           currentSetToCheck = phraseMap.get(nextToken, 0, nextToken.length );
           if (currentPhrase == null) currentPhrase = new StringBuffer( );
@@ -218,6 +218,14 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
     if (phrase.length >= buffer.length) return false;
     for (int i = 0; i < phrase.length; i++){
       if (buffer[i] != phrase[i]) return false;
+	}
+	return true;
+  }
+  
+  private boolean equals( char[] buffer, char[] phrase ) {
+    if (phrase.length != buffer.length) return false;
+	for (int i = 0; i < phrase.length; i++){
+	  if (buffer[i] != phrase[i]) return false;
 	}
 	return true;
   }
@@ -387,6 +395,20 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
 	token.endPos = endPos;
 	token.startPos = endPos - tok.length;
 	tokenList.add( token );
+  }
+  
+  private CharArraySet remove( CharArraySet fromSet, char[] charArray ) {
+	  CharArraySet newSet = new CharArraySet( Version.LUCENE_46, 5, false );
+	  Iterator<Object> phraseIt = currentSetToCheck.iterator();
+      while (phraseIt != null && phraseIt.hasNext() ) {
+        char[] phrase = (char[])phraseIt.next();
+        		
+        if (!equals( phrase, charArray)) {
+        	newSet.add( phrase );
+        }
+      }
+      
+	  return newSet;
   }
   
   class Token {
