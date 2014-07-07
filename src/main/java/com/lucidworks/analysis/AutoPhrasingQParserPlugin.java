@@ -10,6 +10,7 @@ import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.core.WhitespaceTokenizer;
 import org.apache.lucene.analysis.core.LowerCaseFilter;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.analysis.util.ResourceLoader;
 import org.apache.lucene.analysis.util.ResourceLoaderAware;
@@ -34,6 +35,10 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
   private String phraseSetFiles;
   
   private String parserImpl = "lucene";
+  
+  private char replaceWhitespaceWith = 'x';  // preserves stemming
+  
+  private boolean ignoreCase = true;
 	
   @Override
   public void init( NamedList initArgs ) {
@@ -44,6 +49,16 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
     String pImpl = params.get( "defType" );
     if (pImpl != null) {
       parserImpl = pImpl;
+    }
+    
+    String replaceWith = params.get( "replaceWhitespaceWith" );
+    if (replaceWith != null && replaceWith.length() > 0) {
+      replaceWhitespaceWith = replaceWith.charAt(0);
+    }
+    
+    String ignoreCaseSt = params.get( "ignoreCase" );
+    if (ignoreCaseSt != null && ignoreCaseSt.equalsIgnoreCase( "false" )) {
+      ignoreCase = false;
     }
   }
 
@@ -73,6 +88,11 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
 
     query = query.replaceAll( "\\+", "+ " );
     query = query.replaceAll( "\\-", "- " );
+    
+    if (ignoreCase) {
+      query = query.replaceAll( "AND", "&&" );
+      query = query.replaceAll( "OR", "||" );
+    }
         
     try {
       query = autophrase( query );
@@ -81,15 +101,23 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
         
     query = query.replaceAll( "\\+ ", "+" );
     query = query.replaceAll( "\\- ", "-" );
+    
+    if (ignoreCase) {
+      query = query.replaceAll( "&&", "AND" );
+      query = query.replaceAll( "\\|\\|", "OR" );
+    }
 		
     return query;
   }
 	
   private String autophrase( String input ) throws IOException {
     WhitespaceTokenizer wt = new WhitespaceTokenizer(Version.LUCENE_46, new StringReader( input ));
-    LowerCaseFilter lcf = new LowerCaseFilter(Version.LUCENE_46, wt );
-    AutoPhrasingTokenFilter aptf = new AutoPhrasingTokenFilter( Version.LUCENE_46, lcf, phraseSets, false );
-    aptf.setReplaceWhitespaceWith( new Character( 'x' ) );
+    TokenStream ts = wt;
+    if (ignoreCase) {
+      ts = new LowerCaseFilter(Version.LUCENE_46, wt );
+    }
+    AutoPhrasingTokenFilter aptf = new AutoPhrasingTokenFilter( Version.LUCENE_46, ts, phraseSets, false );
+    aptf.setReplaceWhitespaceWith( new Character( replaceWhitespaceWith ) );
     CharTermAttribute term = aptf.addAttribute(CharTermAttribute.class);
     aptf.reset();
         
