@@ -50,6 +50,7 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
   
   private char[] lastToken = null;
   private char[] lastEmitted = null;
+  private char[] lastValid = null;
 
   private Character replaceWhitespaceWith = null;
 	
@@ -107,6 +108,10 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
           currentPhrase.setLength( 0 );
           return true;
         }
+        else if (lastValid != null) {
+        	emit( lastValid );
+        	return true;
+        }
     	else if (!emitSingleTokens) {
           discardCharTokens( currentPhrase, unusedTokens );
           currentSetToCheck = null;
@@ -150,9 +155,23 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
       char[] currentBuffer = getCurrentBuffer( nextToken );
         	
       if (currentSetToCheck.contains( currentBuffer, 0, currentBuffer.length )) {
+        // if its the only one valid, emit it
+    	// if there is a longer one, wait to see if it will be matched
+    	// if the longer one breaks on the next token, emit this one...
         // emit the current phrase
-        emit( currentBuffer );
         currentSetToCheck = remove( currentSetToCheck, currentBuffer );
+          
+    	if (currentSetToCheck.size() == 0) {
+          emit( currentBuffer );
+          lastValid = null;
+    	}
+    	else {
+    	  if (emitSingleTokens) {
+    		  lastToken = currentBuffer;
+    		  return true;
+    	  }
+    	  lastValid = currentBuffer;
+    	}
 
         if (currentSetToCheck.size() == 0 && phraseMap.keySet().contains( nextToken, 0, nextToken.length )) {
           // get the phrase set for this token, add it to currentPhrasesTocheck
@@ -161,7 +180,7 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
           else currentPhrase.setLength( 0 );
           currentPhrase.append( nextToken );
         }
-        return true;
+        return (lastValid != null) ? incrementToken() : true;
       }
         	
       // for each phrase in currentSetToCheck - 
@@ -173,6 +192,12 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
         if (startsWith( phrase, currentBuffer )) {
           return incrementToken( );	
         }
+      }
+      
+      if (lastValid != null) {
+        emit( lastValid );
+        lastValid = null;
+        return true;
       }
       
       if (!emitSingleTokens) {
@@ -403,7 +428,7 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
       while (phraseIt != null && phraseIt.hasNext() ) {
         char[] phrase = (char[])phraseIt.next();
         		
-        if (!equals( phrase, charArray)) {
+        if (!equals( phrase, charArray) && startsWith( phrase, charArray )) {
         	newSet.add( phrase );
         }
       }
