@@ -100,7 +100,36 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
     }
     
     char[] nextToken = nextToken( );
+    // if (nextToken != null) System.out.println( "nextToken: " + new String( nextToken ));
     if (nextToken == null) {
+      if (lastValid != null) {
+    	  emit( lastValid );
+    	  lastValid = null;
+    	  return true;
+      }
+
+      if (emitSingleTokens && currentSetToCheck != null && currentSetToCheck.size() > 0) {
+      	char[] phrase = getFirst( currentSetToCheck );
+      	char[] lastTok = getCurrentBuffer( new char[0] );
+      	if (phrase != null && endsWith( lastTok, phrase)) {
+      	  currentSetToCheck = remove( currentSetToCheck, phrase );
+      	  emit( phrase );
+      	  return true;
+      	}
+      }
+      else if (!emitSingleTokens && currentSetToCheck != null && currentSetToCheck.size() > 0) {
+    	  if (lastEmitted != null && !equals( fixWhitespace(lastEmitted), getCurrentBuffer(new char[0] ))) {
+            discardCharTokens( currentPhrase, unusedTokens );
+            currentSetToCheck = null;
+            if (unusedTokens.size() > 0) {
+              Token aToken = unusedTokens.remove( 0 );
+              Log.debug( "emitting putback token");
+    	      emit( aToken );
+              return true;
+            }
+    	  }
+      }
+      
       if (lastEmitted == null && (currentPhrase != null && currentPhrase.length() > 0)) {
         char[] lastTok = getCurrentBuffer( new char[0] );
         if (currentSetToCheck.contains( lastTok, 0, lastTok.length )) {
@@ -108,10 +137,7 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
           currentPhrase.setLength( 0 );
           return true;
         }
-        else if (lastValid != null) {
-        	emit( lastValid );
-        	return true;
-        }
+
     	else if (!emitSingleTokens) {
           discardCharTokens( currentPhrase, unusedTokens );
           currentSetToCheck = null;
@@ -160,7 +186,7 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
     	// if the longer one breaks on the next token, emit this one...
         // emit the current phrase
         currentSetToCheck = remove( currentSetToCheck, currentBuffer );
-          
+        
     	if (currentSetToCheck.size() == 0) {
           emit( currentBuffer );
           lastValid = null;
@@ -173,16 +199,29 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
     	  lastValid = currentBuffer;
     	}
 
-        if (currentSetToCheck.size() == 0 && phraseMap.keySet().contains( nextToken, 0, nextToken.length )) {
+        if (phraseMap.keySet().contains( nextToken, 0, nextToken.length )) {
           // get the phrase set for this token, add it to currentPhrasesTocheck
           currentSetToCheck = phraseMap.get(nextToken, 0, nextToken.length );
           if (currentPhrase == null) currentPhrase = new StringBuffer( );
           else currentPhrase.setLength( 0 );
           currentPhrase.append( nextToken );
         }
+        
         return (lastValid != null) ? incrementToken() : true;
       }
-        	
+      
+      if (phraseMap.keySet().contains( nextToken, 0, nextToken.length )) {
+        // get the phrase set for this token, add it to currentPhrasesTocheck
+    	// System.out.println( "starting new phrase with " + new String( nextToken ) );
+    	// does this add all of the set? if not need iterator loop
+    	CharArraySet newSet = phraseMap.get(nextToken, 0, nextToken.length);
+    	Iterator<Object> phraseIt = newSet.iterator();
+    	while (phraseIt != null && phraseIt.hasNext() ) {
+          char[] phrase = (char[])phraseIt.next();
+          currentSetToCheck.add( phrase );
+    	}
+      }
+      
       // for each phrase in currentSetToCheck - 
       // if there is a phrase prefix match, get the next token recursively
       Iterator<Object> phraseIt = currentSetToCheck.iterator();
@@ -240,7 +279,7 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
   }
 	
   private boolean startsWith( char[] buffer, char[] phrase ) {
-    if (phrase.length >= buffer.length) return false;
+    if (phrase.length > buffer.length) return false;
     for (int i = 0; i < phrase.length; i++){
       if (buffer[i] != phrase[i]) return false;
 	}
@@ -254,6 +293,7 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
 	}
 	return true;
   }
+  
   
   private boolean endsWith( char[] buffer, char[] phrase ) {
 	if (buffer == null || phrase == null) return false;
@@ -275,6 +315,12 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
     char[] currentBuff = new char[ currentPhrase.length() ];
     currentPhrase.getChars( 0,  currentPhrase.length( ), currentBuff, 0 );
     return currentBuff;
+  }
+  
+  private char[] getFirst( CharArraySet charSet ) {
+	if (charSet.isEmpty()) return null;
+    Iterator<Object> phraseIt = charSet.iterator();
+    return (char[])phraseIt.next();
   }
 	
 	
@@ -423,19 +469,37 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
   }
   
   private CharArraySet remove( CharArraySet fromSet, char[] charArray ) {
+	  // System.out.println( "remove from: " + new String( charArray ));
 	  CharArraySet newSet = new CharArraySet( Version.LUCENE_46, 5, false );
 	  Iterator<Object> phraseIt = currentSetToCheck.iterator();
       while (phraseIt != null && phraseIt.hasNext() ) {
         char[] phrase = (char[])phraseIt.next();
         		
-        if (!equals( phrase, charArray) && startsWith( phrase, charArray )) {
-        	newSet.add( phrase );
+        // if (!equals( phrase, charArray) && (startsWith( charArray, phrase ) || endsWith( charArray, phrase))) {
+        if (!equals( phrase, charArray) && startsWith( phrase, charArray) || endsWith( charArray, phrase)) {
+          newSet.add( phrase );
+        }
+        else {
+          // System.out.println( "removing " + new String( phrase ));
         }
       }
       
 	  return newSet;
   }
   
+  private char[] fixWhitespace( char[] phrase ) {
+	  if (replaceWhitespaceWith == null) return phrase;
+	  char[] fixed = new char[ phrase.length ];
+	  for (int i = 0; i < phrase.length; i++) {
+		  if (phrase[i] == replaceWhitespaceWith.charValue()) {
+			  fixed[i] = ' ';
+		  }
+		  else {
+			  fixed[i] = phrase[i];
+		  }
+	  }
+	  return fixed;
+  }
   class Token {
 	  char[] tok;
 	  int startPos;
