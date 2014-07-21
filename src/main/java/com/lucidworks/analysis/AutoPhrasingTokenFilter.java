@@ -10,6 +10,7 @@ import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
+import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.analysis.util.CharArrayMap;
 import org.slf4j.Logger;
@@ -53,6 +54,8 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
   private char[] lastValid = null;
 
   private Character replaceWhitespaceWith = null;
+  
+  private int positionIncr = 0;
 	
   public AutoPhrasingTokenFilter( Version matchVersion, TokenStream input, CharArraySet phraseSet, boolean emitSingleTokens ) {
     super(input);
@@ -80,6 +83,7 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
 	lastToken = null;
 	lastEmitted = null;
 	unusedTokens.clear( );
+	positionIncr = 0;
 	super.reset();
   }
   
@@ -190,6 +194,7 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
     	if (currentSetToCheck.size() == 0) {
           emit( currentBuffer );
           lastValid = null;
+          --positionIncr;
     	}
     	else {
     	  if (emitSingleTokens) {
@@ -334,9 +339,14 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
 	termAttr.append( new StringBuilder( ).append( token ) );
 	
 	OffsetAttribute offAttr = getOffsetAttribute( );
-	if (offAttr.endOffset() >= token.length){ 
+	if (offAttr != null && offAttr.endOffset() >= token.length){ 
 	  int start = offAttr.endOffset() - token.length;
 	  offAttr.setOffset( start, offAttr.endOffset());
+	}
+	
+	PositionIncrementAttribute pia = getPositionIncrementAttribute( );
+	if (pia != null) {
+		pia.setPositionIncrement( ++positionIncr );
 	}
 	
 	lastEmitted = token;
@@ -389,6 +399,19 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
 			
 	return null;
   }
+  
+  private PositionIncrementAttribute getPositionIncrementAttribute( ) {
+	    // get char term attr from current state
+		Iterator<AttributeImpl> attrIt = getAttributeImplsIterator();
+		while (attrIt != null && attrIt.hasNext() ) {
+		  AttributeImpl attrImp = attrIt.next();
+		  if (attrImp instanceof PositionIncrementAttribute) {
+		    return (PositionIncrementAttribute)attrImp;
+	      }
+		}
+				
+		return null;
+	  }
   
 	
   private CharArrayMap convertPhraseSet( CharArraySet phraseSet ) {
@@ -488,8 +511,8 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
   }
   
   private char[] fixWhitespace( char[] phrase ) {
-	  if (replaceWhitespaceWith == null) return phrase;
-	  char[] fixed = new char[ phrase.length ];
+    if (replaceWhitespaceWith == null) return phrase;
+	char[] fixed = new char[ phrase.length ];
 	  for (int i = 0; i < phrase.length; i++) {
 		  if (phrase[i] == replaceWhitespaceWith.charValue()) {
 			  fixed[i] = ' ';
@@ -500,6 +523,7 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
 	  }
 	  return fixed;
   }
+  
   class Token {
 	  char[] tok;
 	  int startPos;
