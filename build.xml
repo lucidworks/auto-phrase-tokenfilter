@@ -42,12 +42,17 @@
   </target>
 
   <target name="test" depends="compile">
-    <junit printsummary="yes" fork="no">
+    <echo message="Tests are not successfully running through ant right now. Try cmd> java -cp lib/*:build/ com.lucidworks.analysis.TestAutoPhrasingTokenFilter"/>
+    <echo message=""/>
+    <junit printsummary="yes" fork="yes" showoutput="yes">
       <classpath>
         <path refid="classpath"/>
         <pathelement location="${build}"/>
       </classpath> 
-      <test name="com.lucid.analysis.TestAutoPhrasingTokenFilter"/>
+      <assertions>
+        <enable/>
+      </assertions>
+      <test name="com.lucidworks.analysis.TestAutoPhrasingTokenFilter"/>
     </junit>
   </target>
 </project>
