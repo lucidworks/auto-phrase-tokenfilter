@@ -162,7 +162,7 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
     if (fileNames == null)
       return Collections.<String>emptyList();
 
-    List<String> result = new ArrayList<>();
+    List<String> result = new ArrayList<String>();
     for (String file : fileNames.split("(?<!\\\\),")) {
       result.add(file.replaceAll("\\\\(?=,)", ""));
     }

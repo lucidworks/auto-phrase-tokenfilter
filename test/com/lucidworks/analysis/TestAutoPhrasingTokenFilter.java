@@ -23,7 +23,7 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
        aptf.reset();
 
       // printTokens( aptf, term );
-       
+
        assertTrue(aptf.incrementToken());
        assertEquals( "what", term.toString());
        assertTrue(aptf.incrementToken());
