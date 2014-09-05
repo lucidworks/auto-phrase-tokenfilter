@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  * not.
  */
 
-public class AutoPhrasingTokenFilter extends TokenFilter {
+public final class AutoPhrasingTokenFilter extends TokenFilter {
 	
   private static final Logger Log = LoggerFactory.getLogger( AutoPhrasingTokenFilter.class );
 

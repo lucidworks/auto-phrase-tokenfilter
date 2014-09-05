@@ -22,8 +22,6 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
        CharTermAttribute term = aptf.addAttribute(CharTermAttribute.class);
        aptf.reset();
 
-      // printTokens( aptf, term );
-
        assertTrue(aptf.incrementToken());
        assertEquals( "what", term.toString());
        assertTrue(aptf.incrementToken());
@@ -52,8 +50,6 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
        assertEquals( "so", term.toString());
        assertTrue(aptf.incrementToken());
        assertEquals( "high", term.toString());
-       
-       System.out.println( "testAutoPhrase: OK" );
    }
     
     public void testAutoPhraseEmitSingle( ) throws Exception {
@@ -67,8 +63,6 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
         aptf.setReplaceWhitespaceWith( new Character( '_' ) );
         CharTermAttribute term = aptf.addAttribute(CharTermAttribute.class);
         aptf.reset();
-
-        // printTokens( aptf, term );
         
         assertTrue(aptf.incrementToken());
         assertEquals( "what", term.toString());
@@ -108,8 +102,6 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
         assertEquals( "so", term.toString());
         assertTrue(aptf.incrementToken());
         assertEquals( "high", term.toString());
-        
-        System.out.println( "testAutoPhraseEmitSingle: OK" );
     }
     
     public void testOverlappingAtBeginning( ) throws Exception {
@@ -123,8 +115,6 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
           aptf.setReplaceWhitespaceWith( new Character( '_' ) );
           CharTermAttribute term = aptf.addAttribute(CharTermAttribute.class);
           aptf.reset();
-
-         // printTokens( aptf, term );
           
           assertTrue(aptf.incrementToken());
           assertEquals( "new_york_city", term.toString());
@@ -132,8 +122,6 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
           assertEquals( "is", term.toString());
           assertTrue(aptf.incrementToken());
           assertEquals( "great", term.toString());
-          
-          System.out.println( "testOverlappingAtBeginning: OK" );
       }
     
     public void testOverlappingAtBeginningEmitSingle( ) throws Exception {
@@ -148,8 +136,6 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
        aptf.setReplaceWhitespaceWith( new Character( '_' ) );
        CharTermAttribute term = aptf.addAttribute(CharTermAttribute.class);
        aptf.reset();
-
-       // printTokens( aptf, term );
        
        assertTrue(aptf.incrementToken());
        assertEquals( "new", term.toString());
@@ -165,8 +151,6 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
        assertEquals( "is", term.toString());
        assertTrue(aptf.incrementToken());
        assertEquals( "great", term.toString());
-       
-       System.out.println( "testOverlappingAtBeginningEmitSingle: OK" );
    }
     
    public void testOverlappingAtEndEmitSingle( ) throws Exception {
@@ -181,8 +165,6 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
      aptf.setReplaceWhitespaceWith( new Character( '_' ) );
      CharTermAttribute term = aptf.addAttribute(CharTermAttribute.class);
      aptf.reset();
-
-     // printTokens( aptf, term );
      
      assertTrue(aptf.incrementToken());
      assertEquals( "the", term.toString());
@@ -200,8 +182,6 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
      assertEquals( "city_of_new_york", term.toString());
      assertTrue(aptf.incrementToken());
      assertEquals( "new_york", term.toString());
-
-     System.out.println( "testOverlappingAtEndEmitSingle: OK" );
    }
    
    public void testOverlappingAtEnd( ) throws Exception {
@@ -216,8 +196,6 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
     aptf.setReplaceWhitespaceWith( new Character( '_' ) );
     CharTermAttribute term = aptf.addAttribute(CharTermAttribute.class);
     aptf.reset();
-
-    // printTokens( aptf, term );
     
     assertTrue(aptf.incrementToken());
     assertEquals( "the", term.toString());
@@ -225,8 +203,6 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
     assertEquals( "great", term.toString());
     assertTrue(aptf.incrementToken());
     assertEquals( "city_of_new_york", term.toString());
-    
-    System.out.println( "testOverlappingAtEnd: OK" );
    }
    
    public void testIncompletePhrase( ) throws Exception {
@@ -241,8 +217,6 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
     aptf.setReplaceWhitespaceWith( new Character( '_' ) );
     CharTermAttribute term = aptf.addAttribute(CharTermAttribute.class);
     aptf.reset();
-
-    printTokens( aptf, term );
     
     /*assertTrue(aptf.incrementToken());
     assertEquals( "some", term.toString());
@@ -250,33 +224,5 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
     assertEquals( "new_york", term.toString());
     assertTrue(aptf.incrementToken());
     assertEquals( "york", term.toString());*/
-    
-  
-    System.out.println( "testIncompletePhrase: OK" );
  }
-	
-   private void printTokens( AutoPhrasingTokenFilter aptf, CharTermAttribute term ) throws Exception {
-       boolean hasToken = false;
-       do {
-       	hasToken = aptf.incrementToken( );
-       	if (hasToken) System.out.println( "token:'" + term.toString( ) + "'" );
-       } while (hasToken);
-   }
-   
-    public static void main( String[] args ) {
-    	TestAutoPhrasingTokenFilter aptft = new TestAutoPhrasingTokenFilter( );
-    	try {
-    	    aptft.testAutoPhraseEmitSingle( );
-    	    aptft.testAutoPhrase( );
-    	    aptft.testOverlappingAtBeginningEmitSingle();
-    	    aptft.testOverlappingAtBeginning();
-    	    aptft.testOverlappingAtEndEmitSingle();
-    	    aptft.testOverlappingAtEnd();
-    	    
-    	    aptft.testIncompletePhrase();
-    	}
-    	catch ( Exception e ) {
-    		System.out.println( "got Exception: " + e );
-    	}
-    }
 }
