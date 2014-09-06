@@ -97,7 +97,9 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
     try {
       query = autophrase( query );
     }
-    catch (IOException ioe ) {  }
+    catch (IOException ioe ) {
+        Log.error(ioe.toString());
+    }
         
     query = query.replaceAll( "\\+ ", "+" );
     query = query.replaceAll( "\\- ", "-" );
