@@ -210,7 +210,7 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
 	    	"big apple", "new york city", "property tax", "three word phrase"
  	     ), false);
   	 
-    final String input = "some new york";
+    final String input = "some new york city";
   
     WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
     AutoPhrasingTokenFilter aptf = new AutoPhrasingTokenFilter( TEST_VERSION_CURRENT, wt, phraseSets, false );
@@ -218,11 +218,9 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
     CharTermAttribute term = aptf.addAttribute(CharTermAttribute.class);
     aptf.reset();
     
-    /*assertTrue(aptf.incrementToken());
+    assertTrue(aptf.incrementToken());
     assertEquals( "some", term.toString());
     assertTrue(aptf.incrementToken());
-    assertEquals( "new_york", term.toString());
-    assertTrue(aptf.incrementToken());
-    assertEquals( "york", term.toString());*/
+    assertEquals( "new_york_city", term.toString());
  }
 }
