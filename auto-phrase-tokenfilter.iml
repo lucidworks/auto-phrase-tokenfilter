@@ -8,8 +8,8 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="junit-4.10" level="project" />
     <orderEntry type="library" name="lucene-test-framework-4.8-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="junit-4.10" level="project" />
   </component>
 </module>
 
