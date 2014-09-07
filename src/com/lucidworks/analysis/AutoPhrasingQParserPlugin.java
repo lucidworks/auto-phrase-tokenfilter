@@ -29,146 +29,147 @@ import java.nio.charset.StandardCharsets;
 
 
 public class AutoPhrasingQParserPlugin extends QParserPlugin implements ResourceLoaderAware {
-	
-  private static final Logger Log = LoggerFactory.getLogger( AutoPhrasingQParserPlugin.class );
-  private CharArraySet phraseSets;
-  private String phraseSetFiles;
-  
-  private String parserImpl = "lucene";
-  
-  private char replaceWhitespaceWith = 'x';  // preserves stemming
-  
-  private boolean ignoreCase = true;
-	
-  @Override
-  public void init( NamedList initArgs ) {
-    Log.info( "init ..." );
-    SolrParams params = SolrParams.toSolrParams(initArgs);
-    phraseSetFiles = params.get( "phrases" );
-	
-    String pImpl = params.get( "defType" );
-    if (pImpl != null) {
-      parserImpl = pImpl;
-    }
-    
-    String replaceWith = params.get( "replaceWhitespaceWith" );
-    if (replaceWith != null && replaceWith.length() > 0) {
-      replaceWhitespaceWith = replaceWith.charAt(0);
-    }
-    
-    String ignoreCaseSt = params.get( "ignoreCase" );
-    if (ignoreCaseSt != null && ignoreCaseSt.equalsIgnoreCase( "false" )) {
-      ignoreCase = false;
-    }
-  }
 
-  @Override
-  public QParser createParser( String qStr, SolrParams localParams, SolrParams params,
-			                   SolrQueryRequest req) {
-    Log.info( "createParser" );
-    ModifiableSolrParams modparams = new ModifiableSolrParams( params );
-    String modQ = filter( qStr );
+    private static final Logger Log = LoggerFactory.getLogger(AutoPhrasingQParserPlugin.class);
+    private CharArraySet phraseSets;
+    private String phraseSetFiles;
 
-    modparams.set( "q", modQ );
-    return req.getCore().getQueryPlugin( parserImpl )
-                        .createParser(modQ, localParams, modparams, req);
-  }
+    private String parserImpl = "lucene";
 
-  private String filter( String qStr ) {	
-    // 1) collapse " :" to ":" to protect field names
-    // 2) expand ":" to ": " to free terms from field names
-    // 3) expand "+" to "+ " to free terms from "+" operator
-    // 4) expand "-" to "- " to free terms from "-" operator
-	// 5) Autophrase with whitespace tokenizer
-	// 6) collapse "+ " and "- " to "+" and "-" to glom operators.
-		
-    String query = qStr;
-    while( query.contains( " :" ))
-      query = query.replaceAll( "\\s:", ": " );
+    private char replaceWhitespaceWith = 'x';  // preserves stemming
 
-    query = query.replaceAll( "\\+", "+ " );
-    query = query.replaceAll( "\\-", "- " );
-    
-    if (ignoreCase) {
-      query = query.replaceAll( "AND", "&&" );
-      query = query.replaceAll( "OR", "||" );
-    }
-        
-    try {
-      query = autophrase( query );
-    }
-    catch (IOException ioe ) {
-        Log.error(ioe.toString());
-    }
-        
-    query = query.replaceAll( "\\+ ", "+" );
-    query = query.replaceAll( "\\- ", "-" );
-    
-    if (ignoreCase) {
-      query = query.replaceAll( "&&", "AND" );
-      query = query.replaceAll( "\\|\\|", "OR" );
-    }
-		
-    return query;
-  }
-	
-  private String autophrase( String input ) throws IOException {
-    WhitespaceTokenizer wt = new WhitespaceTokenizer(Version.LUCENE_46, new StringReader( input ));
-    TokenStream ts = wt;
-    if (ignoreCase) {
-      ts = new LowerCaseFilter(Version.LUCENE_46, wt );
-    }
-    AutoPhrasingTokenFilter aptf = new AutoPhrasingTokenFilter( Version.LUCENE_46, ts, phraseSets, false );
-    aptf.setReplaceWhitespaceWith( new Character( replaceWhitespaceWith ) );
-    CharTermAttribute term = aptf.addAttribute(CharTermAttribute.class);
-    aptf.reset();
-        
-    StringBuffer strbuf = new StringBuffer( );
-    while( aptf.incrementToken( )) {
-      strbuf.append( term.toString( ) ).append( " " );
-    }
-        
-    return strbuf.toString();
-  }
+    private boolean ignoreCase = true;
 
-  @Override
-  public void inform(ResourceLoader loader) throws IOException {
-    if (phraseSetFiles != null) {
-      phraseSets = getWordSet(loader, phraseSetFiles, true );
-    }
-  }
-	
-  private CharArraySet getWordSet( ResourceLoader loader,
-		                           String wordFiles, boolean ignoreCase)
-		                           throws IOException {
-    List<String> files = splitFileNames(wordFiles);
-	CharArraySet words = null;
-    if (files.size() > 0) {
-      // default stopwords list has 35 or so words, but maybe don't make it that
-      // big to start
-      words = new CharArraySet( Version.LUCENE_46,
-    	                        files.size() * 10, ignoreCase);
-      for (String file : files) {
-        List<String> wlist = getLines(loader, file.trim());
-    	words.addAll(StopFilter.makeStopSet(Version.LUCENE_46, wlist, ignoreCase));
-      }
-    }
-    return words;
-  }
-	
-  private List<String> getLines(ResourceLoader loader, String resource) throws IOException {
-	return WordlistLoader.getLines(loader.openResource(resource), StandardCharsets.UTF_8);
-  }
+    @Override
+    public void init(NamedList initArgs) {
+        Log.info("init ...");
+        SolrParams params = SolrParams.toSolrParams(initArgs);
+        phraseSetFiles = params.get("phrases");
 
-  private List<String> splitFileNames(String fileNames) {
-    if (fileNames == null)
-      return Collections.<String>emptyList();
+        String pImpl = params.get("defType");
+        if (pImpl != null) {
+            parserImpl = pImpl;
+        }
 
-    List<String> result = new ArrayList<String>();
-    for (String file : fileNames.split("(?<!\\\\),")) {
-      result.add(file.replaceAll("\\\\(?=,)", ""));
+        String replaceWith = params.get("replaceWhitespaceWith");
+        if (replaceWith != null && replaceWith.length() > 0) {
+            replaceWhitespaceWith = replaceWith.charAt(0);
+        }
+
+        String ignoreCaseSt = params.get("ignoreCase");
+        if (ignoreCaseSt != null && ignoreCaseSt.equalsIgnoreCase("false")) {
+            ignoreCase = false;
+        }
     }
 
-    return result;
-  }
+    @Override
+    public QParser createParser(String qStr, SolrParams localParams, SolrParams params,
+                                SolrQueryRequest req) {
+        Log.info("createParser");
+        ModifiableSolrParams modifiableSolrParams = new ModifiableSolrParams(params);
+        String modQ = filter(qStr);
+
+        modifiableSolrParams.set("q", modQ);
+        return req.getCore().getQueryPlugin(parserImpl)
+                .createParser(modQ, localParams, modifiableSolrParams, req);
+    }
+
+    private String filter(String qStr) {
+        // 1) collapse " :" to ":" to protect field names
+        // 2) expand ":" to ": " to free terms from field names
+        // 3) expand "+" to "+ " to free terms from "+" operator
+        // 4) expand "-" to "- " to free terms from "-" operator
+        // 5) Autophrase with whitespace tokenizer
+        // 6) collapse "+ " and "- " to "+" and "-" to glom operators.
+
+        String query = qStr;
+        while (query.contains(" :"))
+            query = query.replaceAll("\\s:", ": ");
+
+        query = query.replaceAll("\\+", "+ ");
+        query = query.replaceAll("\\-", "- ");
+
+        if (ignoreCase) {
+            query = query.replaceAll("AND", "&&");
+            query = query.replaceAll("OR", "||");
+        }
+
+        try {
+            query = autophrase(query);
+        } catch (IOException ioe) {
+            Log.error(ioe.toString());
+        }
+
+        query = query.replaceAll("\\+ ", "+");
+        query = query.replaceAll("\\- ", "-");
+
+        if (ignoreCase) {
+            query = query.replaceAll("&&", "AND");
+            query = query.replaceAll("\\|\\|", "OR");
+        }
+
+        return query;
+    }
+
+    private String autophrase(String input) throws IOException {
+        WhitespaceTokenizer wt = new WhitespaceTokenizer(Version.LUCENE_48, new StringReader(input));
+        TokenStream ts = wt;
+        if (ignoreCase) {
+            ts = new LowerCaseFilter(Version.LUCENE_48, wt);
+        }
+        AutoPhrasingTokenFilter autoPhrasingTokenFilter =
+                new AutoPhrasingTokenFilter(Version.LUCENE_48, ts, phraseSets, false);
+        autoPhrasingTokenFilter.setReplaceWhitespaceWith(replaceWhitespaceWith);
+        CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
+        autoPhrasingTokenFilter.reset();
+
+        StringBuilder stringBuilder = new StringBuilder();
+        while (autoPhrasingTokenFilter.incrementToken()) {
+            stringBuilder.append(term.toString()).append(" ");
+        }
+
+        return stringBuilder.toString();
+    }
+
+    @Override
+    public void inform(ResourceLoader loader) throws IOException {
+        if (phraseSetFiles != null) {
+            phraseSets = getWordSet(loader, phraseSetFiles, true);
+        }
+    }
+
+    private CharArraySet getWordSet(ResourceLoader loader,
+                                    String wordFiles, boolean ignoreCase)
+            throws IOException {
+        List<String> files = splitFileNames(wordFiles);
+        CharArraySet words = null;
+        if (files.size() > 0) {
+            // default stop words list has 35 or so words, but maybe don't make it that
+            // big to start
+            words = new CharArraySet(Version.LUCENE_48,
+                    files.size() * 10, ignoreCase);
+            for (String file : files) {
+                List<String> stopWords = getLines(loader, file.trim());
+                words.addAll(StopFilter.makeStopSet(Version.LUCENE_48, stopWords, ignoreCase));
+            }
+        }
+        return words;
+    }
+
+    private List<String> getLines(ResourceLoader loader, String resource) throws IOException {
+        return WordlistLoader.getLines(loader.openResource(resource), StandardCharsets.UTF_8);
+    }
+
+    private List<String> splitFileNames(String fileNames) {
+        if (fileNames == null) {
+            return Collections.emptyList();
+        }
+
+        List<String> result = new ArrayList<String>();
+        for (String file : fileNames.split("(?<!\\\\),")) {
+            result.add(file.replaceAll("\\\\(?=,)", ""));
+        }
+
+        return result;
+    }
 }
