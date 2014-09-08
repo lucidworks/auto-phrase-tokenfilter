@@ -2,8 +2,6 @@ package com.lucidworks.analysis;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.lucene.analysis.core.StopFilter;
@@ -32,34 +30,14 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
 
     private static final Logger Log = LoggerFactory.getLogger(AutoPhrasingQParserPlugin.class);
     private CharArraySet phraseSets;
-    private String phraseSetFiles;
 
-    private String parserImpl = "lucene";
-
-    private char replaceWhitespaceWith = 'x';  // preserves stemming
-
-    private boolean ignoreCase = true;
+    private AutoPhrasingParameters autoPhrasingParameters;
 
     @Override
     public void init(NamedList initArgs) {
         Log.info("init ...");
-        SolrParams params = SolrParams.toSolrParams(initArgs);
-        phraseSetFiles = params.get("phrases");
-
-        String pImpl = params.get("defType");
-        if (pImpl != null) {
-            parserImpl = pImpl;
-        }
-
-        String replaceWith = params.get("replaceWhitespaceWith");
-        if (replaceWith != null && replaceWith.length() > 0) {
-            replaceWhitespaceWith = replaceWith.charAt(0);
-        }
-
-        String ignoreCaseSt = params.get("ignoreCase");
-        if (ignoreCaseSt != null && ignoreCaseSt.equalsIgnoreCase("false")) {
-            ignoreCase = false;
-        }
+        SolrParams solrParams = SolrParams.toSolrParams(initArgs);
+        autoPhrasingParameters = new AutoPhrasingParameters(solrParams);
     }
 
     @Override
@@ -70,7 +48,7 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
         String modQ = filter(qStr);
 
         modifiableSolrParams.set("q", modQ);
-        return req.getCore().getQueryPlugin(parserImpl)
+        return req.getCore().getQueryPlugin(autoPhrasingParameters.getDownstreamParser())
                 .createParser(modQ, localParams, modifiableSolrParams, req);
     }
 
@@ -89,7 +67,7 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
         query = query.replaceAll("\\+", "+ ");
         query = query.replaceAll("\\-", "- ");
 
-        if (ignoreCase) {
+        if (autoPhrasingParameters.getIgnoreCase()) {
             query = query.replaceAll("AND", "&&");
             query = query.replaceAll("OR", "||");
         }
@@ -103,7 +81,7 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
         query = query.replaceAll("\\+ ", "+");
         query = query.replaceAll("\\- ", "-");
 
-        if (ignoreCase) {
+        if (autoPhrasingParameters.getIgnoreCase()) {
             query = query.replaceAll("&&", "AND");
             query = query.replaceAll("\\|\\|", "OR");
         }
@@ -114,12 +92,12 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
     private String autophrase(String input) throws IOException {
         WhitespaceTokenizer wt = new WhitespaceTokenizer(Version.LUCENE_48, new StringReader(input));
         TokenStream ts = wt;
-        if (ignoreCase) {
+        if (autoPhrasingParameters.getIgnoreCase()) {
             ts = new LowerCaseFilter(Version.LUCENE_48, wt);
         }
         AutoPhrasingTokenFilter autoPhrasingTokenFilter =
                 new AutoPhrasingTokenFilter(Version.LUCENE_48, ts, phraseSets, false);
-        autoPhrasingTokenFilter.setReplaceWhitespaceWith(replaceWhitespaceWith);
+        autoPhrasingTokenFilter.setReplaceWhitespaceWith(autoPhrasingParameters.getReplaceWhitespaceWith());
         CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
         autoPhrasingTokenFilter.reset();
 
@@ -133,15 +111,14 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
 
     @Override
     public void inform(ResourceLoader loader) throws IOException {
-        if (phraseSetFiles != null) {
-            phraseSets = getWordSet(loader, phraseSetFiles, true);
-        }
+        List<String> phraseSetFiles = autoPhrasingParameters.getIndividualPhraseSetFiles();
+        phraseSets = getWordSet(loader, phraseSetFiles, true);
     }
 
     private CharArraySet getWordSet(ResourceLoader loader,
-                                    String wordFiles, boolean ignoreCase)
+                                    List<String> files, boolean ignoreCase)
             throws IOException {
-        List<String> files = splitFileNames(wordFiles);
+
         CharArraySet words = null;
         if (files.size() > 0) {
             // default stop words list has 35 or so words, but maybe don't make it that
@@ -158,18 +135,5 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
 
     private List<String> getLines(ResourceLoader loader, String resource) throws IOException {
         return WordlistLoader.getLines(loader.openResource(resource), StandardCharsets.UTF_8);
-    }
-
-    private List<String> splitFileNames(String fileNames) {
-        if (fileNames == null) {
-            return Collections.emptyList();
-        }
-
-        List<String> result = new ArrayList<String>();
-        for (String file : fileNames.split("(?<!\\\\),")) {
-            result.add(file.replaceAll("\\\\(?=,)", ""));
-        }
-
-        return result;
     }
 }
