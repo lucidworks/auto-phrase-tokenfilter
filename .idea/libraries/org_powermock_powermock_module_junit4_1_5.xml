@@ -1,0 +1,17 @@
+<component name="libraryTable">
+  <library name="org.powermock:powermock-module-junit4:1.5" type="repository">
+    <properties maven-id="org.powermock:powermock-module-junit4:1.5" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/powermock/powermock-module-junit4/1.5/powermock-module-junit4-1.5.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/junit/junit/4.9/junit-4.9.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/hamcrest/hamcrest-core/1.1/hamcrest-core-1.1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/powermock/powermock-module-junit4-common/1.5/powermock-module-junit4-common-1.5.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/powermock/powermock-core/1.5/powermock-core-1.5.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/powermock/powermock-reflect/1.5/powermock-reflect-1.5.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/objenesis/objenesis/1.2/objenesis-1.2.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/javassist/javassist/3.17.1-GA/javassist-3.17.1-GA.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
