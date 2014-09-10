@@ -10,8 +10,8 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="lucene-test-framework-4.8-SNAPSHOT" level="project" />
     <orderEntry type="library" name="junit-4.10" level="project" />
-    <orderEntry type="library" name="org.powermock:powermock-module-junit4:1.5" level="project" />
     <orderEntry type="library" name="org.powermock:powermock-api-mockito:1.5.6" level="project" />
+    <orderEntry type="library" name="org.powermock:powermock-module-junit4:1.5.6" level="project" />
   </component>
 </module>
 
