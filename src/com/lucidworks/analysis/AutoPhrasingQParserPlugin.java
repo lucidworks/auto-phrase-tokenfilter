@@ -2,6 +2,7 @@ package com.lucidworks.analysis;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.lucene.analysis.core.StopFilter;
@@ -135,5 +136,13 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
 
     private List<String> getLines(ResourceLoader loader, String resource) throws IOException {
         return WordlistLoader.getLines(loader.openResource(resource), StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Returns the phrases that were loaded, intended for testing only
+     * @return The phrase set
+     */
+    public CharArraySet getPhrases(){
+        return phraseSets;
     }
 }

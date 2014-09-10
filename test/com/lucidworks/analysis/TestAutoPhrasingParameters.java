@@ -1,9 +1,11 @@
 package com.lucidworks.analysis;
 
+import java.io.Serializable;
 import junit.framework.TestCase;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
 
+@SuppressWarnings("FieldCanBeLocal")
 public class TestAutoPhrasingParameters extends TestCase {
     private final String DefaultDownstreamParser = "lucene";
     private final char DefaultReplaceWhitespaceWith = 'x';
@@ -82,7 +84,7 @@ public class TestAutoPhrasingParameters extends TestCase {
     }
 
     private SolrParams getSolrParamsOnePhraseFile() {
-        NamedList params  = new NamedList();
+        NamedList<Serializable> params  = new NamedList<Serializable>();
         params.add("defType", DownstreamParser);
         params.add("replaceWhitespaceWith", ReplaceWhitespaceWith);
         params.add("ignoreCase", IgnoreCase);
@@ -93,7 +95,7 @@ public class TestAutoPhrasingParameters extends TestCase {
     }
 
     private SolrParams getSolrParamsMultiplePhraseFiles() {
-        NamedList params  = new NamedList();
+        NamedList<Serializable> params  = new NamedList<Serializable>();
         params.add("defType", DownstreamParser);
         params.add("replaceWhitespaceWith", ReplaceWhitespaceWith);
         params.add("ignoreCase", IgnoreCase);
@@ -104,7 +106,7 @@ public class TestAutoPhrasingParameters extends TestCase {
     }
 
     private SolrParams getSolrParamsNoIgnoreCase() {
-        NamedList params  = new NamedList();
+        NamedList<Serializable> params  = new NamedList<Serializable>();
         params.add("defType", DownstreamParser);
         params.add("replaceWhitespaceWith", ReplaceWhitespaceWith);
         params.add("phrases", PhrasesOneFile);
@@ -114,7 +116,7 @@ public class TestAutoPhrasingParameters extends TestCase {
     }
 
     private SolrParams getSolrParamsNoEmitSingleTokens() {
-        NamedList params  = new NamedList();
+        NamedList<Serializable> params  = new NamedList<Serializable>();
         params.add("defType", DownstreamParser);
         params.add("replaceWhitespaceWith", ReplaceWhitespaceWith);
         params.add("ignoreCase", IgnoreCase);
