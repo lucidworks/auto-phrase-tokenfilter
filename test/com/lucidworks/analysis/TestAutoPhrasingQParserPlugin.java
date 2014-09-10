@@ -38,14 +38,16 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
     private final boolean IgnoreCase = false;
     private final String DownstreamParser = "edismax";
 
-    public void testCreateParser() throws Exception {
+    public void testCreateParserNoChangeSingleTerm() throws Exception {
+        invokeCreateParser("something", "something");
+    }
+
+    private void invokeCreateParser(String query, String expectedModifiedQuery) throws IOException {
         AutoPhrasingQParserPlugin parser = getParserAndInvokeInit();
         assertNotNull(parser);
 
         invokeInform(parser);
 
-        String query = "something";
-        String modifiedQuery = "something";
         SolrParams params = SolrParams.toSolrParams(getParams());
         SolrParams localParams = SolrParams.toSolrParams(new NamedList());
 
@@ -56,13 +58,13 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
         Mockito.when(mockQueryRequest.getCore()).thenReturn(mockSolrCore);
         PowerMockito.when(mockSolrCore.getQueryPlugin(DownstreamParser)).thenReturn(mockQueryPlugin);
         Mockito.when(mockQueryPlugin.createParser(
-                Matchers.eq(modifiedQuery), Matchers.any(SolrParams.class),
+                Matchers.eq(expectedModifiedQuery), Matchers.any(SolrParams.class),
                 Matchers.any(SolrParams.class), Matchers.any(SolrQueryRequest.class))).thenReturn(null);
 
         parser.createParser(query, params, localParams, mockQueryRequest);
 
         Mockito.verify(mockQueryPlugin).createParser(
-                Matchers.eq(modifiedQuery), Matchers.any(SolrParams.class),
+                Matchers.eq(expectedModifiedQuery), Matchers.any(SolrParams.class),
                 Matchers.any(SolrParams.class), Matchers.any(SolrQueryRequest.class));
     }
 
