@@ -3,6 +3,7 @@
     <words>
       <w>bytecode</w>
       <w>noverify</w>
+      <w>solr</w>
     </words>
   </dictionary>
 </component>

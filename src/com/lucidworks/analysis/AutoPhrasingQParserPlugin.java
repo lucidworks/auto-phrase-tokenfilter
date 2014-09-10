@@ -140,13 +140,9 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
 
     /**
      * Returns the phrases that were loaded, intended for testing only
-     * @return The private phraseSet as a list
+     * @return The phrase set
      */
-    public List<String> getPhrases(){
-        List<String> phrases = new ArrayList<String>(phraseSets.size());
-        for (Object phrase: phraseSets){
-            phrases.add(phrase.toString());
-        }
-        return phrases;
+    public CharArraySet getPhrases(){
+        return phraseSets;
     }
 }

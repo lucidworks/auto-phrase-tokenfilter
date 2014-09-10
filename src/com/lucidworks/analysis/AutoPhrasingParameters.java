@@ -9,6 +9,7 @@ import java.util.List;
 /**
  * Abstracts the parameters (and the parsing of those parameters) used by the auto phrasing parser
  */
+@SuppressWarnings("FieldCanBeLocal")
 public class AutoPhrasingParameters {
     private final String DefaultDownstreamParser = "lucene";
     private final char DefaultReplaceWhitespaceWith = 'x';

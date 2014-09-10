@@ -1,6 +1,7 @@
 package com.lucidworks.analysis;
 
 import junit.framework.TestCase;
+import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.analysis.util.ResourceLoader;
 import org.apache.lucene.analysis.util.WordlistLoader;
@@ -14,6 +15,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.InputStream;
+import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +29,8 @@ import java.util.List;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(WordlistLoader.class)
 public class TestAutoPhrasingQParserPlugin extends TestCase {
+
+    private final boolean IgnoreCase = false;
 
     public void testCreateParser() throws Exception {
         //TODO: finish this
@@ -44,16 +48,20 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
         AutoPhrasingQParserPlugin parser = getParser();
         parser.inform(mockResourceLoader);
 
-        List<String> actualPhrases = parser.getPhrases();
-        assertEquals(expectedPhrases.size(), actualPhrases.size());
-        //TODO: assert contents perhaps by calling StopFilter.makeStopSet
+        CharArraySet actualSet = parser.getPhrases();
+        CharArraySet expectedSet = StopFilter.makeStopSet(Version.LUCENE_48, expectedPhrases, IgnoreCase);
+
+        assertEquals(expectedSet.size(), actualSet.size());
+        for (Object anExpected : expectedSet) {
+            assertTrue(actualSet.contains(anExpected));
+        }
     }
 
     private AutoPhrasingQParserPlugin getParser() {
         AutoPhrasingQParserPlugin parser = new AutoPhrasingQParserPlugin();
         assertNotNull(parser);
 
-        NamedList params = getParams();
+        NamedList<java.io.Serializable> params = getParams();
         parser.init(params);
 
         return parser;
@@ -66,12 +74,12 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
         return phrases;
     }
 
-    private NamedList getParams() {
+    private NamedList<Serializable> getParams() {
 
-        NamedList params  = new NamedList();
+        NamedList<Serializable> params  = new NamedList<Serializable>();
         params.add("defType", "edismax");
         params.add("replaceWhitespaceWith", 'Z');
-        params.add("ignoreCase", false);
+        params.add("ignoreCase", IgnoreCase);
         params.add("phrases", "phrases.txt");
         params.add("includeTokens", true);
 
