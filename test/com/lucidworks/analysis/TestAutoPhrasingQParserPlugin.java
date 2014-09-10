@@ -14,6 +14,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.nio.charset.Charset;
@@ -31,22 +32,17 @@ import java.util.List;
 public class TestAutoPhrasingQParserPlugin extends TestCase {
 
     private final boolean IgnoreCase = false;
+    private final String DownstreamParser = "edismax";
 
     public void testCreateParser() throws Exception {
-        //TODO: finish this
+        AutoPhrasingQParserPlugin parser = getParserAndInvokeInit();
+        assertNotNull(parser);
     }
 
     public void testInform() throws Exception {
-        ResourceLoader mockResourceLoader = Mockito.mock(ResourceLoader.class);
+        AutoPhrasingQParserPlugin parser = getParserAndInvokeInit();
 
-        PowerMockito.mockStatic(WordlistLoader.class);
-
-        List<String> expectedPhrases = getPhrases();
-        Mockito.when(WordlistLoader.getLines((InputStream) Matchers.anyObject(), (Charset) Matchers.anyObject()))
-            .thenReturn(expectedPhrases);
-
-        AutoPhrasingQParserPlugin parser = getParser();
-        parser.inform(mockResourceLoader);
+        List<String> expectedPhrases = invokeInform(parser);
 
         CharArraySet actualSet = parser.getPhrases();
         CharArraySet expectedSet = StopFilter.makeStopSet(Version.LUCENE_48, expectedPhrases, IgnoreCase);
@@ -57,7 +53,20 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
         }
     }
 
-    private AutoPhrasingQParserPlugin getParser() {
+    private List<String> invokeInform(AutoPhrasingQParserPlugin parser) throws IOException {
+        ResourceLoader mockResourceLoader = Mockito.mock(ResourceLoader.class);
+        PowerMockito.mockStatic(WordlistLoader.class);
+
+        List<String> expectedPhrases = getPhrases();
+        Mockito.when(WordlistLoader.getLines((InputStream) Matchers.anyObject(), (Charset) Matchers.anyObject()))
+                .thenReturn(expectedPhrases);
+
+        parser.inform(mockResourceLoader);
+
+        return expectedPhrases;
+    }
+
+    private AutoPhrasingQParserPlugin getParserAndInvokeInit() {
         AutoPhrasingQParserPlugin parser = new AutoPhrasingQParserPlugin();
         assertNotNull(parser);
 
@@ -71,13 +80,14 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
         List<String> phrases = new ArrayList<String>();
         phrases.add("hi");
         phrases.add("there");
+        phrases.add("wheel chair");
         return phrases;
     }
 
     private NamedList<Serializable> getParams() {
 
         NamedList<Serializable> params  = new NamedList<Serializable>();
-        params.add("defType", "edismax");
+        params.add("defType", DownstreamParser);
         params.add("replaceWhitespaceWith", 'Z');
         params.add("ignoreCase", IgnoreCase);
         params.add("phrases", "phrases.txt");
