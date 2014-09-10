@@ -31,6 +31,7 @@ import java.util.List;
  * More info at: https://code.google.com/p/powermock/issues/detail?id=504
  * Workaround is to add the -noverify vm option to the test run configuration
  */
+@SuppressWarnings("UnnecessaryLocalVariable")
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({WordlistLoader.class, SolrCore.class})
 public class TestAutoPhrasingQParserPlugin extends TestCase {
@@ -96,6 +97,62 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
     public void testCreateParserMultiplePhrases() throws Exception {
         String actual = "wheel chair hi there";
         String expected = String.format("wheel%cchair hi%cthere", DefaultReplaceWhitespaceWith, DefaultReplaceWhitespaceWith);
+        invokeCreateParser(actual, expected);
+    }
+
+    public void testCreateParserStemming() throws Exception {
+        // Note: This is undesirable. Ideally, stemming would find it and fix it but it hasn't run yet.
+        String actual = "wheel chairs";
+        String expected = actual;
+        invokeCreateParser(actual, expected);
+    }
+
+    public void testCreateParserPhraseQuery() throws Exception {
+        String actual = "\"some phrase\"";
+        String expected = actual;
+        invokeCreateParser(actual, expected);
+    }
+
+    public void testCreateParserMandatoryAndOptionalClause() throws Exception {
+        String actual = "+mandatory -optional";
+        String expected = actual;
+        invokeCreateParser(actual, expected);
+    }
+
+    public void testCreateParserLocalParameters() throws Exception {
+        String actual = "{!q.op=AND df=title}solr rocks";
+        String expected = actual;
+        invokeCreateParser(actual, expected);
+    }
+
+    public void testCreateParserRangeQueryToNow() throws Exception {
+        String actual = "timestamp:[* TO NOW]";
+        String expected = actual;
+        invokeCreateParser(actual, expected);
+    }
+
+    public void testCreateParserRangeQueryToNowIgnoreCase() throws Exception {
+        // Note: This is undesirable as it breaks Lucene range queries where TO must be upper case.
+        String actual = "timestamp:[* TO NOW]";
+        String expected = actual.toLowerCase();
+        invokeCreateParser(actual, expected, true, DefaultReplaceWhitespaceWith);
+    }
+
+    public void testCreateParserRangeQueryDateToStar() throws Exception {
+        String actual = "timestamp:[1976-03-06T23:59:59.999Z TO *]";
+        String expected = actual;
+        invokeCreateParser(actual, expected);
+    }
+
+    public void testCreateParserRangeQueryDateToDate() throws Exception {
+        String actual = "timestamp:[1995-12-31T23:59:59.999Z TO 2007-03-06T00:00:00Z]";
+        String expected = actual;
+        invokeCreateParser(actual, expected);
+    }
+
+    public void testCreateParserRangeQueryDateMath() throws Exception {
+        String actual = "timestamp:[NOW-1YEAR/DAY TO NOW/DAY+1DAY]";
+        String expected = actual;
         invokeCreateParser(actual, expected);
     }
 
