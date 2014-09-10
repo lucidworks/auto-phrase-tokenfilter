@@ -34,7 +34,7 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
 
     @Override
     public void init(NamedList initArgs) {
-        Log.info("init ...");
+        Log.debug("init AutoPhrasingQParserPlugin...");
         SolrParams solrParams = SolrParams.toSolrParams(initArgs);
         autoPhrasingParameters = new AutoPhrasingParameters(solrParams);
     }
@@ -42,7 +42,7 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
     @Override
     public QParser createParser(String qStr, SolrParams localParams, SolrParams params,
                                 SolrQueryRequest req) {
-        Log.info("createParser");
+        Log.debug("createParser AutoPhrasingQParserPlugin...");
         ModifiableSolrParams modifiableSolrParams = new ModifiableSolrParams(params);
         String modQ = filter(qStr);
 
