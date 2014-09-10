@@ -6,7 +6,11 @@ import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.analysis.util.ResourceLoader;
 import org.apache.lucene.analysis.util.WordlistLoader;
 import org.apache.lucene.util.Version;
+import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
+import org.apache.solr.core.SolrCore;
+import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.search.QParserPlugin;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
@@ -28,7 +32,7 @@ import java.util.List;
  *       Workaround is to add the -noverify vm option to the test run configuration
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(WordlistLoader.class)
+@PrepareForTest({WordlistLoader.class, SolrCore.class})
 public class TestAutoPhrasingQParserPlugin extends TestCase {
 
     private final boolean IgnoreCase = false;
@@ -37,6 +41,29 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
     public void testCreateParser() throws Exception {
         AutoPhrasingQParserPlugin parser = getParserAndInvokeInit();
         assertNotNull(parser);
+
+        invokeInform(parser);
+
+        String query = "something";
+        String modifiedQuery = "something";
+        SolrParams params = SolrParams.toSolrParams(getParams());
+        SolrParams localParams = SolrParams.toSolrParams(new NamedList());
+
+        SolrQueryRequest mockQueryRequest = Mockito.mock(SolrQueryRequest.class);
+        final SolrCore mockSolrCore = PowerMockito.mock(SolrCore.class);
+        QParserPlugin mockQueryPlugin = Mockito.mock(QParserPlugin.class);
+
+        Mockito.when(mockQueryRequest.getCore()).thenReturn(mockSolrCore);
+        PowerMockito.when(mockSolrCore.getQueryPlugin(DownstreamParser)).thenReturn(mockQueryPlugin);
+        Mockito.when(mockQueryPlugin.createParser(
+                Matchers.eq(modifiedQuery), Matchers.any(SolrParams.class),
+                Matchers.any(SolrParams.class), Matchers.any(SolrQueryRequest.class))).thenReturn(null);
+
+        parser.createParser(query, params, localParams, mockQueryRequest);
+
+        Mockito.verify(mockQueryPlugin).createParser(
+                Matchers.eq(modifiedQuery), Matchers.any(SolrParams.class),
+                Matchers.any(SolrParams.class), Matchers.any(SolrQueryRequest.class));
     }
 
     public void testInform() throws Exception {

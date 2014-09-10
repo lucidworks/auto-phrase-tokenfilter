@@ -104,6 +104,10 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
         while (autoPhrasingTokenFilter.incrementToken()) {
             stringBuilder.append(term.toString()).append(" ");
         }
+        // remove the extra space on the end
+        int length = stringBuilder.length();
+        if (length > 0)
+            stringBuilder.deleteCharAt(length - 1);
 
         return stringBuilder.toString();
     }
