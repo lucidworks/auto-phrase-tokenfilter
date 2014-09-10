@@ -28,22 +28,85 @@ import java.util.List;
 /**
  * Unit tests for the AutoPhrasingQParserPlugin
  * Note: The use of PowerMock with java 1.7.0_65 will blow up with a "Error exists in the bytecode" type message
- *       More info at: https://code.google.com/p/powermock/issues/detail?id=504
- *       Workaround is to add the -noverify vm option to the test run configuration
+ * More info at: https://code.google.com/p/powermock/issues/detail?id=504
+ * Workaround is to add the -noverify vm option to the test run configuration
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({WordlistLoader.class, SolrCore.class})
 public class TestAutoPhrasingQParserPlugin extends TestCase {
 
-    private final boolean IgnoreCase = false;
+    private final boolean DefaultIgnoreCase = false;
     private final String DownstreamParser = "edismax";
+    private final char DefaultReplaceWhitespaceWith = 'Z';
 
     public void testCreateParserNoChangeSingleTerm() throws Exception {
-        invokeCreateParser("something", "something");
+        String actual = "something";
+        String expected = "something";
+        invokeCreateParser(actual, expected);
+    }
+
+    public void testCreateParserNoChangeMultipleTerms() throws Exception {
+        String actual = "two things";
+        String expected = "two things";
+        invokeCreateParser(actual, expected);
+    }
+
+    public void testCreateParserEmptyQuery() throws Exception {
+        String actual = "";
+        String expected = "";
+        invokeCreateParser(actual, expected);
+    }
+
+    public void testCreateParserOnlySpace() throws Exception {
+        String actual = " ";
+        String expected = "";
+        invokeCreateParser(actual, expected);
+    }
+
+    public void testCreateParserFieldAndValue() throws Exception {
+        String actual = "Field:Value";
+        String expected = "Field:Value";
+        invokeCreateParser(actual, expected);
+    }
+
+    public void testCreateParserMultipleThings() throws Exception {
+        String actual = "Field:Value something else";
+        String expected = "Field:Value something else";
+        invokeCreateParser(actual, expected);
+    }
+
+    public void testCreateParserSimpleReplace() throws Exception {
+        String actual = "wheel chair";
+        String expected = String.format("wheel%cchair", DefaultReplaceWhitespaceWith);
+        invokeCreateParser(actual, expected);
+    }
+
+    public void testCreateParserDoNotIgnoreCase() throws Exception {
+        String actual = "Wheel Chair";
+        String expected = "Wheel Chair";
+        invokeCreateParser(actual, expected);
+    }
+
+    public void testCreateParserIgnoreCase() throws Exception {
+        String actual = "Wheel Chair";
+        String expected = String.format("wheel%cchair", DefaultReplaceWhitespaceWith);
+        invokeCreateParser(actual, expected, true, DefaultReplaceWhitespaceWith);
+    }
+
+    public void testCreateParserMultiplePhrases() throws Exception {
+        String actual = "wheel chair hi there";
+        String expected = String.format("wheel%cchair hi%cthere", DefaultReplaceWhitespaceWith, DefaultReplaceWhitespaceWith);
+        invokeCreateParser(actual, expected);
     }
 
     private void invokeCreateParser(String query, String expectedModifiedQuery) throws IOException {
-        AutoPhrasingQParserPlugin parser = getParserAndInvokeInit();
+        invokeCreateParser(query, expectedModifiedQuery, DefaultIgnoreCase, DefaultReplaceWhitespaceWith);
+    }
+
+    private void invokeCreateParser(
+            String query, String expectedModifiedQuery, boolean ignoreCase, char replaceWhitespaceWith) throws IOException {
+
+        AutoPhrasingQParserPlugin parser = getParserAndInvokeInit(ignoreCase, replaceWhitespaceWith);
         assertNotNull(parser);
 
         invokeInform(parser);
@@ -74,7 +137,7 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
         List<String> expectedPhrases = invokeInform(parser);
 
         CharArraySet actualSet = parser.getPhrases();
-        CharArraySet expectedSet = StopFilter.makeStopSet(Version.LUCENE_48, expectedPhrases, IgnoreCase);
+        CharArraySet expectedSet = StopFilter.makeStopSet(Version.LUCENE_48, expectedPhrases, DefaultIgnoreCase);
 
         assertEquals(expectedSet.size(), actualSet.size());
         for (Object anExpected : expectedSet) {
@@ -96,29 +159,36 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
     }
 
     private AutoPhrasingQParserPlugin getParserAndInvokeInit() {
+        return getParserAndInvokeInit(DefaultIgnoreCase, DefaultReplaceWhitespaceWith);
+    }
+
+    private AutoPhrasingQParserPlugin getParserAndInvokeInit(boolean ignoreCase, char replaceWhitespaceWith) {
         AutoPhrasingQParserPlugin parser = new AutoPhrasingQParserPlugin();
         assertNotNull(parser);
 
-        NamedList<java.io.Serializable> params = getParams();
+        NamedList<java.io.Serializable> params = getParams(ignoreCase, replaceWhitespaceWith);
         parser.init(params);
 
         return parser;
     }
 
-    private List<String> getPhrases(){
+    private List<String> getPhrases() {
         List<String> phrases = new ArrayList<String>();
-        phrases.add("hi");
-        phrases.add("there");
+        phrases.add("hi there");
         phrases.add("wheel chair");
         return phrases;
     }
 
     private NamedList<Serializable> getParams() {
+        return getParams(DefaultIgnoreCase, DefaultReplaceWhitespaceWith);
+    }
 
-        NamedList<Serializable> params  = new NamedList<Serializable>();
+    private NamedList<Serializable> getParams(boolean ignoreCase, char replaceWhitespaceWith) {
+
+        NamedList<Serializable> params = new NamedList<Serializable>();
         params.add("defType", DownstreamParser);
-        params.add("replaceWhitespaceWith", 'Z');
-        params.add("ignoreCase", IgnoreCase);
+        params.add("replaceWhitespaceWith", replaceWhitespaceWith);
+        params.add("ignoreCase", ignoreCase);
         params.add("phrases", "phrases.txt");
         params.add("includeTokens", true);
 
