@@ -12,7 +12,7 @@ import java.util.List;
 @SuppressWarnings("FieldCanBeLocal")
 public class AutoPhrasingParameters {
     private final String DefaultDownstreamParser = "lucene";
-    private final Character DefaultReplaceWhitespaceWith = 'x';
+    private final Character DefaultReplaceWhitespaceWith = null;
     private final boolean DefaultIgnoreCase = true;
     private final boolean DefaultEmitSingleTokens = false;
 
@@ -25,8 +25,7 @@ public class AutoPhrasingParameters {
             emitSingleTokens = DefaultEmitSingleTokens;
         } else {
             setDownstreamParser(solrParams.get("defType", DefaultDownstreamParser));
-            setReplaceWhitespaceWith(solrParams.get("replaceWhitespaceWith",
-                    Character.toString(DefaultReplaceWhitespaceWith)));
+            setReplaceWhitespaceWith(solrParams.get("replaceWhitespaceWith", null));
             setIgnoreCase(solrParams.getBool("ignoreCase", DefaultIgnoreCase));
             setPhraseSetFiles(solrParams.get("phrases"));
             setEmitSingleTokens(solrParams.getBool("includeTokens", DefaultEmitSingleTokens));

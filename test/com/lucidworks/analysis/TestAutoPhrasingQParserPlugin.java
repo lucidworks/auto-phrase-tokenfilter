@@ -39,6 +39,7 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
     private final boolean DefaultIgnoreCase = false;
     private final String DownstreamParser = "edismax";
     private final Character DefaultReplaceWhitespaceWith = 'Z';
+    private final Character EmptyReplaceWhitespaceWith = null;
 
     public void testCreateParserNoChangeSingleTerm() throws Exception {
         String actual = "something";
@@ -194,6 +195,36 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
         invokeCreateParser(actual, expected, true, DefaultReplaceWhitespaceWith);
     }
 
+    public void testCreateParserEmptyReplaceNoPhrase() throws Exception {
+        String actual = "something";
+        String expected = actual;
+        invokeCreateParser(actual, expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+    }
+
+    public void testCreateParserEmptyReplaceWithSpaceNoPhrase() throws Exception {
+        String actual = "two things";
+        String expected = actual;
+        invokeCreateParser(actual, expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+    }
+
+    public void testCreateParserEmptyReplaceWithPhrase() throws Exception {
+        String actual = "wheel chair";
+        String expected = "wheelchair";
+        invokeCreateParser(actual, expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+    }
+
+    public void testCreateParserEmptyReplaceMultiplePhrasesSomeMatch() throws Exception {
+        String actual = "wheel chair something hi there";
+        String expected = "wheelchair something hithere";
+        invokeCreateParser(actual, expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+    }
+
+    public void testCreateParserEmptyReplaceMultiplePhrasesInsideString() throws Exception {
+        String actual = "something wheel chair hi there something else";
+        String expected = "something wheelchair hithere something else";
+        invokeCreateParser(actual, expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+    }
+
     private void invokeCreateParser(String query, String expectedModifiedQuery) throws IOException {
         invokeCreateParser(query, expectedModifiedQuery, DefaultIgnoreCase, DefaultReplaceWhitespaceWith);
     }
@@ -271,6 +302,7 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
         List<String> phrases = new ArrayList<String>();
         phrases.add("hi there");
         phrases.add("wheel chair");
+        phrases.add("something"); // to test adding a single word that might be processed
         return phrases;
     }
 
@@ -282,7 +314,9 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
 
         NamedList<Serializable> params = new NamedList<Serializable>();
         params.add("defType", DownstreamParser);
-        params.add("replaceWhitespaceWith", replaceWhitespaceWith);
+        if (replaceWhitespaceWith != null) {
+            params.add("replaceWhitespaceWith", replaceWhitespaceWith);
+        }
         params.add("ignoreCase", ignoreCase);
         params.add("phrases", "phrases.txt");
         params.add("includeTokens", true);

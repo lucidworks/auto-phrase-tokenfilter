@@ -8,7 +8,7 @@ import org.apache.solr.common.util.NamedList;
 @SuppressWarnings("FieldCanBeLocal")
 public class TestAutoPhrasingParameters extends TestCase {
     private final String DefaultDownstreamParser = "lucene";
-    private final Character DefaultReplaceWhitespaceWith = 'x';
+    private final Character DefaultReplaceWhitespaceWith = null;
     private final boolean DefaultIgnoreCase = true;
     private final boolean DefaultEmitSingleTokens = false;
     private final String DefaultPhraseSetFiles = null;

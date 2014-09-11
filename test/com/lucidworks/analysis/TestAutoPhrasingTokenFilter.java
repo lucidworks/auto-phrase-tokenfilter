@@ -230,4 +230,26 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
         assertTrue(autoPhrasingTokenFilter.incrementToken());
         assertEquals("new_york_city", term.toString());
     }
+
+    public void testPhrasesNullReplace() throws Exception {
+        final CharArraySet phraseSets = new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(
+                "big apple", "new york city", "property tax", "three word phrase"
+        ), false);
+
+        final String input = "some new york city something";
+
+        WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
+        AutoPhrasingTokenFilter autoPhrasingTokenFilter =
+                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets, false);
+        autoPhrasingTokenFilter.setReplaceWhitespaceWith(null);
+        CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
+        autoPhrasingTokenFilter.reset();
+
+        assertTrue(autoPhrasingTokenFilter.incrementToken());
+        assertEquals("some", term.toString());
+        assertTrue(autoPhrasingTokenFilter.incrementToken());
+        assertEquals("newyorkcity", term.toString());
+        assertTrue(autoPhrasingTokenFilter.incrementToken());
+        assertEquals("something", term.toString());
+    }
 }

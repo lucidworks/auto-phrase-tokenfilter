@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import static java.lang.System.arraycopy;
+
 /**
  * Performs "auto phrasing" on a token stream. Auto phrases refer to sequences of tokens that
  * are meant to describe a single thing and should be searched for as such. When these phrases
@@ -265,7 +267,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
             if (termAttr != null) {
                 char[] termBuf = termAttr.buffer();
                 char[] nextTok = new char[termAttr.length()];
-                System.arraycopy(termBuf, 0, nextTok, 0, termAttr.length());
+                arraycopy(termBuf, 0, nextTok, 0, termAttr.length());
                 return nextTok;
             }
         }
@@ -321,9 +323,9 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
 
     private void emit(char[] token) {
         Log.debug("emit: " + new String(token));
-        if (replaceWhitespaceWith != null) {
-            token = replaceWhiteSpace(token);
-        }
+
+        token = replaceWhiteSpace(token);
+
         CharTermAttribute termAttr = getTermAttribute();
         termAttr.setEmpty();
         termAttr.append(new StringBuilder().append(token));
@@ -353,12 +355,21 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
     // replaces whitespace char with replaceWhitespaceWith
     private char[] replaceWhiteSpace(char[] token) {
         char[] replaced = new char[token.length];
-        for (int i = 0; i < token.length; i++) {
-            if (token[i] == ' ') {
-                replaced[i] = replaceWhitespaceWith;
+        int srcPos, destPos;
+        for (srcPos = 0, destPos = 0; srcPos < token.length; srcPos++) {
+            if (token[srcPos] == ' ') {
+                if (replaceWhitespaceWith == null) {
+                    continue;
+                }
+                replaced[destPos++] = replaceWhitespaceWith;
             } else {
-                replaced[i] = token[i];
+                replaced[destPos++] = token[srcPos];
             }
+        }
+        if (srcPos != destPos){
+            char[] shorterReplaced = new char[destPos];
+            System.arraycopy(replaced, 0, shorterReplaced, 0, destPos);
+            return shorterReplaced;
         }
         return replaced;
     }
@@ -434,7 +445,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
         }
 
         char[] firstCh = new char[spNdx - 1];
-        System.arraycopy(phrase, 0, firstCh, 0, spNdx - 1);
+        arraycopy(phrase, 0, firstCh, 0, spNdx - 1);
         return firstCh;
     }
 
