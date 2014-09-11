@@ -67,6 +67,8 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
         if (autoPhrasingParameters.getIgnoreCase()) {
             query = query.replaceAll("AND", "&&");
             query = query.replaceAll("OR", "||");
+            query = query.replaceAll("TO", "`to`");
+            query = query.replaceAll("NOW", "`now`");
         }
 
         // grouping with parenthesis
@@ -93,6 +95,8 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
         if (autoPhrasingParameters.getIgnoreCase()) {
             query = query.replaceAll("&&", "AND");
             query = query.replaceAll("\\|\\|", "OR");
+            query = query.replaceAll("`to`", "TO");
+            query = query.replaceAll("`now`", "NOW");
         }
 
         // restore grouping with parenthesis

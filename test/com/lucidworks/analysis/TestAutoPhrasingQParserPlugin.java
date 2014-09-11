@@ -152,9 +152,8 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
     }
 
     public void testCreateParserRangeQueryToNowIgnoreCase() throws Exception {
-        // Note: This is undesirable as it breaks Lucene range queries where TO must be upper case.
         String actual = "timestamp:[* TO NOW]";
-        String expected = actual.toLowerCase();
+        String expected = actual;
         invokeCreateParser(actual, expected, true, DefaultReplaceWhitespaceWith);
     }
 
