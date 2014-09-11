@@ -8,13 +8,13 @@ import org.apache.solr.common.util.NamedList;
 @SuppressWarnings("FieldCanBeLocal")
 public class TestAutoPhrasingParameters extends TestCase {
     private final String DefaultDownstreamParser = "lucene";
-    private final char DefaultReplaceWhitespaceWith = 'x';
+    private final Character DefaultReplaceWhitespaceWith = 'x';
     private final boolean DefaultIgnoreCase = true;
     private final boolean DefaultEmitSingleTokens = false;
     private final String DefaultPhraseSetFiles = null;
 
     private final String DownstreamParser = "edismax";
-    private final char ReplaceWhitespaceWith = 'Z';
+    private final Character ReplaceWhitespaceWith = 'Z';
     private final boolean IgnoreCase = false;
     private final String PhrasesOneFile = "phrases.txt";
     private final String PhrasesMultipleFiles = "phrases.txt,more_phrases.txt";

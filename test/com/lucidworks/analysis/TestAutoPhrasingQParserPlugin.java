@@ -38,7 +38,7 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
 
     private final boolean DefaultIgnoreCase = false;
     private final String DownstreamParser = "edismax";
-    private final char DefaultReplaceWhitespaceWith = 'Z';
+    private final Character DefaultReplaceWhitespaceWith = 'Z';
 
     public void testCreateParserNoChangeSingleTerm() throws Exception {
         String actual = "something";
@@ -199,7 +199,7 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
     }
 
     private void invokeCreateParser(
-            String query, String expectedModifiedQuery, boolean ignoreCase, char replaceWhitespaceWith) throws IOException {
+            String query, String expectedModifiedQuery, boolean ignoreCase, Character replaceWhitespaceWith) throws IOException {
 
         AutoPhrasingQParserPlugin parser = getParserAndInvokeInit(ignoreCase, replaceWhitespaceWith);
         assertNotNull(parser);
@@ -257,7 +257,7 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
         return getParserAndInvokeInit(DefaultIgnoreCase, DefaultReplaceWhitespaceWith);
     }
 
-    private AutoPhrasingQParserPlugin getParserAndInvokeInit(boolean ignoreCase, char replaceWhitespaceWith) {
+    private AutoPhrasingQParserPlugin getParserAndInvokeInit(boolean ignoreCase, Character replaceWhitespaceWith) {
         AutoPhrasingQParserPlugin parser = new AutoPhrasingQParserPlugin();
         assertNotNull(parser);
 
@@ -278,7 +278,7 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
         return getParams(DefaultIgnoreCase, DefaultReplaceWhitespaceWith);
     }
 
-    private NamedList<Serializable> getParams(boolean ignoreCase, char replaceWhitespaceWith) {
+    private NamedList<Serializable> getParams(boolean ignoreCase, Character replaceWhitespaceWith) {
 
         NamedList<Serializable> params = new NamedList<Serializable>();
         params.add("defType", DownstreamParser);
