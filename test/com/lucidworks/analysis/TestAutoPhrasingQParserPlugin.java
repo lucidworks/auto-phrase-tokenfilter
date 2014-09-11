@@ -156,6 +156,18 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
         invokeCreateParser(actual, expected);
     }
 
+    public void testCreateParserGroupedNoPhrase() throws Exception {
+        String actual = "(something that doesn't match)";
+        String expected = actual;
+        invokeCreateParser(actual, expected);
+    }
+
+    public void testCreateParserGroupedAutoPhrase() throws Exception {
+        String actual = "(wheel chair)";
+        String expected = String.format("(wheel%cchair)", DefaultReplaceWhitespaceWith);
+        invokeCreateParser(actual, expected);
+    }
+
     private void invokeCreateParser(String query, String expectedModifiedQuery) throws IOException {
         invokeCreateParser(query, expectedModifiedQuery, DefaultIgnoreCase, DefaultReplaceWhitespaceWith);
     }
