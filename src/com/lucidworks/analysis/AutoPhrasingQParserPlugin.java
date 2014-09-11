@@ -70,8 +70,13 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
         }
 
         // grouping with parenthesis
-        query = query.replaceAll( "\\(", "( " );
-        query = query.replaceAll( "\\)", " )" );
+        query = query.replaceAll("\\(", "( ");
+        query = query.replaceAll("\\)", " )");
+
+        // phrases with quotes
+        query = String.format(" %s ", query);
+        query = query.replaceAll("(^|\\s)\"", " open_quote` ");
+        query = query.replaceAll("\"(\\s|$)", " close_quote` ");
 
         // autophrase the query
         try {
@@ -93,6 +98,10 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
         // restore grouping with parenthesis
         query = query.replaceAll( "\\( ", "(" );
         query = query.replaceAll( " \\)", ")" );
+
+        // restore quotes
+        query = query.replaceAll("open_quote`\\s", "\"");
+        query = query.replaceAll("\\sclose_quote`", "\"");
 
         return query;
     }

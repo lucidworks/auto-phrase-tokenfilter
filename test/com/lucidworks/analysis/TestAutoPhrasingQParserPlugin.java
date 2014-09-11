@@ -113,6 +113,26 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
         invokeCreateParser(actual, expected);
     }
 
+    public void testCreateParserPhraseQueryWithAutoPhrase() throws Exception {
+        String actual = "\"wheel chair\"";
+        String expected = String.format("\"wheel%cchair\"", DefaultReplaceWhitespaceWith);
+        invokeCreateParser(actual, expected);
+    }
+
+    public void testCreateParserMultiplePhraseQueries() throws Exception {
+        String actual = "something \"wheel chair\" \"hi there\" something else";
+        String expected = String.format("something \"wheel%cchair\" \"hi%cthere\" something else",
+                DefaultReplaceWhitespaceWith, DefaultReplaceWhitespaceWith);
+        invokeCreateParser(actual, expected);
+    }
+
+    public void testCreateParserMultiplePhraseQueriesStartAndEndOfString() throws Exception {
+        String actual = "\"wheel chair\" something something else \"hi there\"";
+        String expected = String.format("\"wheel%cchair\" something something else \"hi%cthere\"",
+                DefaultReplaceWhitespaceWith, DefaultReplaceWhitespaceWith);
+        invokeCreateParser(actual, expected);
+    }
+
     public void testCreateParserMandatoryAndOptionalClause() throws Exception {
         String actual = "+mandatory -optional";
         String expected = actual;
@@ -174,8 +194,6 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
                 DefaultReplaceWhitespaceWith, DefaultReplaceWhitespaceWith);
         invokeCreateParser(actual, expected, true, DefaultReplaceWhitespaceWith);
     }
-
-
 
     private void invokeCreateParser(String query, String expectedModifiedQuery) throws IOException {
         invokeCreateParser(query, expectedModifiedQuery, DefaultIgnoreCase, DefaultReplaceWhitespaceWith);
