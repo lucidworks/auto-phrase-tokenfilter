@@ -168,6 +168,15 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
         invokeCreateParser(actual, expected);
     }
 
+    public void testCreateParserBooleanLogicIgnoreCase() throws Exception {
+        String actual = "Wheel Chair AND something else OR hi there";
+        String expected = String.format("wheel%cchair AND something else OR hi%cthere",
+                DefaultReplaceWhitespaceWith, DefaultReplaceWhitespaceWith);
+        invokeCreateParser(actual, expected, true, DefaultReplaceWhitespaceWith);
+    }
+
+
+
     private void invokeCreateParser(String query, String expectedModifiedQuery) throws IOException {
         invokeCreateParser(query, expectedModifiedQuery, DefaultIgnoreCase, DefaultReplaceWhitespaceWith);
     }
