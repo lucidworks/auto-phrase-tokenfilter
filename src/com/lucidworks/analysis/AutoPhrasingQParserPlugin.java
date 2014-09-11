@@ -34,7 +34,7 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
 
     @Override
     public void init(NamedList initArgs) {
-        Log.info("init ...");
+        Log.debug("init AutoPhrasingQParserPlugin...");
         SolrParams solrParams = SolrParams.toSolrParams(initArgs);
         autoPhrasingParameters = new AutoPhrasingParameters(solrParams);
     }
@@ -42,7 +42,7 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
     @Override
     public QParser createParser(String qStr, SolrParams localParams, SolrParams params,
                                 SolrQueryRequest req) {
-        Log.info("createParser");
+        Log.debug("createParser AutoPhrasingQParserPlugin...");
         ModifiableSolrParams modifiableSolrParams = new ModifiableSolrParams(params);
         String modQ = filter(qStr);
 
@@ -52,38 +52,60 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
     }
 
     private String filter(String qStr) {
-        // 1) collapse " :" to ":" to protect field names
-        // 2) expand ":" to ": " to free terms from field names
-        // 3) expand "+" to "+ " to free terms from "+" operator
-        // 4) expand "-" to "- " to free terms from "-" operator
-        // 5) Autophrase with whitespace tokenizer
-        // 6) collapse "+ " and "- " to "+" and "-" to glom operators.
 
         String query = qStr;
+
+        // filter : for field names
         while (query.contains(" :"))
             query = query.replaceAll("\\s:", ": ");
 
+        // mandatory and optional clauses
         query = query.replaceAll("\\+", "+ ");
         query = query.replaceAll("\\-", "- ");
 
+        // logical operators
         if (autoPhrasingParameters.getIgnoreCase()) {
             query = query.replaceAll("AND", "&&");
             query = query.replaceAll("OR", "||");
+            query = query.replaceAll("TO", "`to`");
+            query = query.replaceAll("NOW", "`now`");
         }
 
+        // grouping with parenthesis
+        query = query.replaceAll("\\(", "( ");
+        query = query.replaceAll("\\)", " )");
+
+        // phrases with quotes
+        query = String.format(" %s ", query);
+        query = query.replaceAll("(^|\\s)\"", " open_quote` ");
+        query = query.replaceAll("\"(\\s|$)", " close_quote` ");
+
+        // autophrase the query
         try {
             query = autophrase(query);
         } catch (IOException ioe) {
             Log.error(ioe.toString());
         }
 
+        // restore mandatory and optional
         query = query.replaceAll("\\+ ", "+");
         query = query.replaceAll("\\- ", "-");
 
+        // restore logical operators
         if (autoPhrasingParameters.getIgnoreCase()) {
             query = query.replaceAll("&&", "AND");
             query = query.replaceAll("\\|\\|", "OR");
+            query = query.replaceAll("`to`", "TO");
+            query = query.replaceAll("`now`", "NOW");
         }
+
+        // restore grouping with parenthesis
+        query = query.replaceAll( "\\( ", "(" );
+        query = query.replaceAll( " \\)", ")" );
+
+        // restore quotes
+        query = query.replaceAll("open_quote`\\s", "\"");
+        query = query.replaceAll("\\sclose_quote`", "\"");
 
         return query;
     }
@@ -105,7 +127,7 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
             stringBuilder.append(term.toString()).append(" ");
         }
 
-        return stringBuilder.toString();
+        return stringBuilder.toString().trim();
     }
 
     @Override
