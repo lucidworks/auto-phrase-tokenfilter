@@ -225,6 +225,12 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
         invokeCreateParser(actual, expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
     }
 
+    public void testCreateParserMultipleSpacesInPhrase() throws Exception {
+        String actual = "more than one space";
+        String expected = "morethanonespace";
+        invokeCreateParser(actual, expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+    }
+
     private void invokeCreateParser(String query, String expectedModifiedQuery) throws IOException {
         invokeCreateParser(query, expectedModifiedQuery, DefaultIgnoreCase, DefaultReplaceWhitespaceWith);
     }
@@ -303,6 +309,7 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
         phrases.add("hi there");
         phrases.add("wheel chair");
         phrases.add("something"); // to test adding a single word that might be processed
+        phrases.add("more than one space");
         return phrases;
     }
 
