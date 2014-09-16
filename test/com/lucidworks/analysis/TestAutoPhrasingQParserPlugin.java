@@ -231,6 +231,12 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
         invokeCreateParser(actual, expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
     }
 
+    public void testCreateParserDuplicatePhrase() throws Exception {
+        String actual = "dup licate";
+        String expected = "duplicate";
+        invokeCreateParser(actual, expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+    }
+
     private void invokeCreateParser(String query, String expectedModifiedQuery) throws IOException {
         invokeCreateParser(query, expectedModifiedQuery, DefaultIgnoreCase, DefaultReplaceWhitespaceWith);
     }
@@ -310,6 +316,8 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
         phrases.add("wheel chair");
         phrases.add("something"); // to test adding a single word that might be processed
         phrases.add("more than one space");
+        phrases.add("dup licate");
+        phrases.add("dup licate");
         return phrases;
     }
 
