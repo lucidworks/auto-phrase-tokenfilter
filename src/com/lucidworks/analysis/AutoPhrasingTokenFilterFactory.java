@@ -36,7 +36,7 @@ public class AutoPhrasingTokenFilterFactory extends TokenFilterFactory implement
     @Override
     public TokenStream create(TokenStream input) {
         boolean emitSingleTokens = autoPhrasingParameters.getEmitSingleTokens();
-        char replaceWhitespaceWith = autoPhrasingParameters.getReplaceWhitespaceWith();
+        Character replaceWhitespaceWith = autoPhrasingParameters.getReplaceWhitespaceWith();
 
         AutoPhrasingTokenFilter autoPhraseFilter = new AutoPhrasingTokenFilter(
                 luceneMatchVersion, input, phraseSets, emitSingleTokens);
