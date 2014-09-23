@@ -252,4 +252,108 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
         assertTrue(autoPhrasingTokenFilter.incrementToken());
         assertEquals("something", term.toString());
     }
+
+    public void testPhrasesNullReplacePartialPhraseMatchIsOnlyToken() throws Exception {
+        final CharArraySet phraseSets = new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(
+                "big apple", "new york city", "property tax", "three word phrase"
+        ), false);
+
+        final String input = "big";
+
+        WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
+        AutoPhrasingTokenFilter autoPhrasingTokenFilter =
+                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets, false);
+        autoPhrasingTokenFilter.setReplaceWhitespaceWith(null);
+        CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
+        autoPhrasingTokenFilter.reset();
+
+        assertTrue(autoPhrasingTokenFilter.incrementToken());
+        assertEquals("big", term.toString());
+    }
+
+    public void testPhrasesNullReplacePartialPhraseMatch() throws Exception {
+        final CharArraySet phraseSets = new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(
+                "big apple", "new york city", "property tax", "three word phrase"
+        ), false);
+
+        final String input = "big orange";
+
+        WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
+        AutoPhrasingTokenFilter autoPhrasingTokenFilter =
+                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets, false);
+        autoPhrasingTokenFilter.setReplaceWhitespaceWith(null);
+        CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
+        autoPhrasingTokenFilter.reset();
+
+        assertTrue(autoPhrasingTokenFilter.incrementToken());
+        assertEquals("big", term.toString());
+        assertTrue(autoPhrasingTokenFilter.incrementToken());
+        assertEquals("orange", term.toString());
+    }
+
+    public void testPhrasesNullReplacePartialPhraseMatchPartOnEnd() throws Exception {
+        final CharArraySet phraseSets = new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(
+                "big apple", "new york city", "property tax", "three word phrase"
+        ), false);
+
+        final String input = "orange big";
+
+        WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
+        AutoPhrasingTokenFilter autoPhrasingTokenFilter =
+                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets, false);
+        autoPhrasingTokenFilter.setReplaceWhitespaceWith(null);
+        CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
+        autoPhrasingTokenFilter.reset();
+
+        assertTrue(autoPhrasingTokenFilter.incrementToken());
+        assertEquals("orange", term.toString());
+        assertTrue(autoPhrasingTokenFilter.incrementToken());
+        assertEquals("big", term.toString());
+    }
+
+    /*public void testPhrasesNullReplacePartialPhraseMatchPrecedingStuff() throws Exception {
+        final CharArraySet phraseSets = new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(
+                "big apple", "new york city", "property tax", "three word phrase"
+        ), false);
+
+        final String input = "something big orange";
+
+        WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
+        AutoPhrasingTokenFilter autoPhrasingTokenFilter =
+                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets, false);
+        autoPhrasingTokenFilter.setReplaceWhitespaceWith(null);
+        CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
+        autoPhrasingTokenFilter.reset();
+
+        assertTrue(autoPhrasingTokenFilter.incrementToken());
+        assertEquals("something", term.toString());
+        assertTrue(autoPhrasingTokenFilter.incrementToken());
+        assertEquals("big", term.toString());
+        assertTrue(autoPhrasingTokenFilter.incrementToken());
+        assertEquals("orange", term.toString());
+    }*/
+
+    public void testPhrasesNullReplacePartialPhraseMatchPartOnEndPrecedingStuff() throws Exception {
+        final CharArraySet phraseSets = new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(
+                "big apple", "new york city", "property tax", "three word phrase"
+        ), false);
+
+        final String input = "new york city something orange big";
+
+        WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
+        AutoPhrasingTokenFilter autoPhrasingTokenFilter =
+                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets, false);
+        autoPhrasingTokenFilter.setReplaceWhitespaceWith(null);
+        CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
+        autoPhrasingTokenFilter.reset();
+
+        assertTrue(autoPhrasingTokenFilter.incrementToken());
+        assertEquals("newyorkcity", term.toString());
+        assertTrue(autoPhrasingTokenFilter.incrementToken());
+        assertEquals("something", term.toString());
+        assertTrue(autoPhrasingTokenFilter.incrementToken());
+        assertEquals("orange", term.toString());
+        assertTrue(autoPhrasingTokenFilter.incrementToken());
+        assertEquals("big", term.toString());
+    }
 }

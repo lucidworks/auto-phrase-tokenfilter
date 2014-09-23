@@ -7,11 +7,9 @@ import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.analysis.util.CharArrayMap;
 import org.apache.lucene.analysis.util.CharArraySet;
-import org.apache.lucene.util.AttributeImpl;
 import org.apache.lucene.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -33,6 +31,10 @@ import static java.lang.System.arraycopy;
 public final class AutoPhrasingTokenFilter extends TokenFilter {
 
     private static final Logger Log = LoggerFactory.getLogger(AutoPhrasingTokenFilter.class);
+
+    private CharTermAttribute charTermAttr;
+    private PositionIncrementAttribute positionIncrementAttr;
+    private OffsetAttribute offsetAttr;
 
     // The list of auto-phrase character strings
     private CharArrayMap<CharArraySet> phraseMap;
@@ -64,6 +66,8 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
     public AutoPhrasingTokenFilter(Version matchVersion, TokenStream input, CharArraySet phraseSet, boolean emitSingleTokens) {
         super(input);
 
+        initializeAttributes();
+
         // Convert to CharArrayMap by iterating the char[] strings and
         // putting them into the CharArrayMap with Integer of the number
         // of tokens in the map: need this to determine when a phrase match is completed.
@@ -71,8 +75,10 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
         this.emitSingleTokens = emitSingleTokens;
     }
 
-    protected AutoPhrasingTokenFilter(TokenStream input) {
-        super(input);
+    private void initializeAttributes() {
+        this.charTermAttr = addAttribute(CharTermAttribute.class);
+        this.positionIncrementAttr = addAttribute(PositionIncrementAttribute.class);
+        this.offsetAttr = addAttribute(OffsetAttribute.class);
     }
 
     public void setReplaceWhitespaceWith(Character replaceWhitespaceWith) {
@@ -263,11 +269,10 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
 
     private char[] nextToken() throws IOException {
         if (input.incrementToken()) {
-            CharTermAttribute termAttr = getTermAttribute();
-            if (termAttr != null) {
-                char[] termBuf = termAttr.buffer();
-                char[] nextTok = new char[termAttr.length()];
-                arraycopy(termBuf, 0, nextTok, 0, termAttr.length());
+            if (charTermAttr != null) {
+                char[] termBuf = charTermAttr.buffer();
+                char[] nextTok = new char[charTermAttr.length()];
+                arraycopy(termBuf, 0, nextTok, 0, charTermAttr.length());
                 return nextTok;
             }
         }
@@ -326,29 +331,23 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
 
         token = replaceWhiteSpace(token);
 
-        CharTermAttribute termAttr = getTermAttribute();
-        termAttr.setEmpty();
-        termAttr.append(new StringBuilder().append(token));
+        charTermAttr.setEmpty();
+        charTermAttr.append(new StringBuilder().append(token));
 
-        OffsetAttribute offAttr = getOffsetAttribute();
-        if (offAttr != null && offAttr.endOffset() >= token.length) {
-            int start = offAttr.endOffset() - token.length;
-            offAttr.setOffset(start, offAttr.endOffset());
+        if (offsetAttr != null && offsetAttr.endOffset() >= token.length) {
+            int start = offsetAttr.endOffset() - token.length;
+            offsetAttr.setOffset(start, offsetAttr.endOffset());
         }
 
-        PositionIncrementAttribute pia = getPositionIncrementAttribute();
-        if (pia != null) {
-            pia.setPositionIncrement(++positionIncrement);
-        }
+        positionIncrementAttr.setPositionIncrement(++positionIncrement);
 
         lastEmitted = token;
     }
 
     private void emit(Token token) {
         emit(token.tok);
-        OffsetAttribute offAttr = getOffsetAttribute();
         if (token.endPos > token.startPos && token.startPos >= 0) {
-            offAttr.setOffset(token.startPos, token.endPos);
+            offsetAttr.setOffset(token.startPos, token.endPos);
         }
     }
 
@@ -373,46 +372,6 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
         }
         return replaced;
     }
-
-    private CharTermAttribute getTermAttribute() {
-        // get char term attr from current state
-        Iterator<AttributeImpl> attrIt = getAttributeImplsIterator();
-        while (attrIt != null && attrIt.hasNext()) {
-            AttributeImpl attrImp = attrIt.next();
-            if (attrImp instanceof CharTermAttribute) {
-                return (CharTermAttribute) attrImp;
-            }
-        }
-
-        return null;
-    }
-
-    private OffsetAttribute getOffsetAttribute() {
-        // get char term attr from current state
-        Iterator<AttributeImpl> attrIt = getAttributeImplsIterator();
-        while (attrIt != null && attrIt.hasNext()) {
-            AttributeImpl attrImp = attrIt.next();
-            if (attrImp instanceof OffsetAttribute) {
-                return (OffsetAttribute) attrImp;
-            }
-        }
-
-        return null;
-    }
-
-    private PositionIncrementAttribute getPositionIncrementAttribute() {
-        // get char term attr from current state
-        Iterator<AttributeImpl> attrIt = getAttributeImplsIterator();
-        while (attrIt != null && attrIt.hasNext()) {
-            AttributeImpl attrImp = attrIt.next();
-            if (attrImp instanceof PositionIncrementAttribute) {
-                return (PositionIncrementAttribute) attrImp;
-            }
-        }
-
-        return null;
-    }
-
 
     private CharArrayMap convertPhraseSet(CharArraySet phraseSet) {
         CharArrayMap<CharArraySet> phraseMap = new CharArrayMap(Version.LUCENE_48, 100, false);
@@ -458,8 +417,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
     // the current ending position and the length of each token.
     private void discardCharTokens(StringBuffer phrase, ArrayList<Token> tokenList) {
         Log.debug("discardCharTokens: '" + phrase.toString() + "'");
-        OffsetAttribute offAttr = getOffsetAttribute();
-        int endPos = offAttr.endOffset();
+        int endPos = offsetAttr.endOffset();
         int startPos = endPos - phrase.length();
 
         int lastSp = 0;
