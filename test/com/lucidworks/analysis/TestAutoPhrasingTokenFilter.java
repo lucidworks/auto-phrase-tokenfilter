@@ -51,6 +51,8 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
         assertEquals("so", term.toString());
         assertTrue(autoPhrasingTokenFilter.incrementToken());
         assertEquals("high", term.toString());
+
+        assertFalse(autoPhrasingTokenFilter.incrementToken());
     }
 
     public void testAutoPhraseEmitSingle() throws Exception {
@@ -104,6 +106,8 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
         assertEquals("so", term.toString());
         assertTrue(autoPhrasingTokenFilter.incrementToken());
         assertEquals("high", term.toString());
+
+        assertFalse(autoPhrasingTokenFilter.incrementToken());
     }
 
     public void testOverlappingAtBeginning() throws Exception {
@@ -125,6 +129,8 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
         assertEquals("is", term.toString());
         assertTrue(autoPhrasingTokenFilter.incrementToken());
         assertEquals("great", term.toString());
+
+        assertFalse(autoPhrasingTokenFilter.incrementToken());
     }
 
     public void testOverlappingAtBeginningEmitSingle() throws Exception {
@@ -155,6 +161,8 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
         assertEquals("is", term.toString());
         assertTrue(autoPhrasingTokenFilter.incrementToken());
         assertEquals("great", term.toString());
+
+        assertFalse(autoPhrasingTokenFilter.incrementToken());
     }
 
     public void testOverlappingAtEndEmitSingle() throws Exception {
@@ -187,6 +195,8 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
         assertEquals("city_of_new_york", term.toString());
         assertTrue(autoPhrasingTokenFilter.incrementToken());
         assertEquals("new_york", term.toString());
+
+        assertFalse(autoPhrasingTokenFilter.incrementToken());
     }
 
     public void testOverlappingAtEnd() throws Exception {
@@ -209,6 +219,8 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
         assertEquals("great", term.toString());
         assertTrue(autoPhrasingTokenFilter.incrementToken());
         assertEquals("city_of_new_york", term.toString());
+
+        assertFalse(autoPhrasingTokenFilter.incrementToken());
     }
 
     public void testIncompletePhrase() throws Exception {
@@ -229,6 +241,8 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
         assertEquals("some", term.toString());
         assertTrue(autoPhrasingTokenFilter.incrementToken());
         assertEquals("new_york_city", term.toString());
+
+        assertFalse(autoPhrasingTokenFilter.incrementToken());
     }
 
     public void testPhrasesNullReplace() throws Exception {
@@ -251,6 +265,8 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
         assertEquals("newyorkcity", term.toString());
         assertTrue(autoPhrasingTokenFilter.incrementToken());
         assertEquals("something", term.toString());
+
+        assertFalse(autoPhrasingTokenFilter.incrementToken());
     }
 
     public void testPhrasesNullReplacePartialPhraseMatchIsOnlyToken() throws Exception {
@@ -269,6 +285,8 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
 
         assertTrue(autoPhrasingTokenFilter.incrementToken());
         assertEquals("big", term.toString());
+
+        assertFalse(autoPhrasingTokenFilter.incrementToken());
     }
 
     public void testPhrasesNullReplacePartialPhraseMatch() throws Exception {
@@ -289,6 +307,8 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
         assertEquals("big", term.toString());
         assertTrue(autoPhrasingTokenFilter.incrementToken());
         assertEquals("orange", term.toString());
+
+        assertFalse(autoPhrasingTokenFilter.incrementToken());
     }
 
     public void testPhrasesNullReplacePartialPhraseMatchPartOnEnd() throws Exception {
@@ -309,6 +329,8 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
         assertEquals("orange", term.toString());
         assertTrue(autoPhrasingTokenFilter.incrementToken());
         assertEquals("big", term.toString());
+
+        assertFalse(autoPhrasingTokenFilter.incrementToken());
     }
 
     /*public void testPhrasesNullReplacePartialPhraseMatchPrecedingStuff() throws Exception {
@@ -331,6 +353,8 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
         assertEquals("big", term.toString());
         assertTrue(autoPhrasingTokenFilter.incrementToken());
         assertEquals("orange", term.toString());
+
+        assertFalse(autoPhrasingTokenFilter.incrementToken());
     }*/
 
     public void testPhrasesNullReplacePartialPhraseMatchPartOnEndPrecedingStuff() throws Exception {
@@ -355,5 +379,7 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
         assertEquals("orange", term.toString());
         assertTrue(autoPhrasingTokenFilter.incrementToken());
         assertEquals("big", term.toString());
+
+        assertFalse(autoPhrasingTokenFilter.incrementToken());
     }
 }
