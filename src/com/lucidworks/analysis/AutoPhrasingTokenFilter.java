@@ -27,7 +27,7 @@ import static java.lang.System.arraycopy;
  * not.
  */
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "PrimitiveArrayArgumentToVariableArgMethod"})
 public final class AutoPhrasingTokenFilter extends TokenFilter {
 
     private static final Logger Log = LoggerFactory.getLogger(AutoPhrasingTokenFilter.class);
@@ -85,6 +85,16 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
         this.replaceWhitespaceWith = replaceWhitespaceWith;
     }
 
+    /**
+     * Logs a debug message and only does a string format if debug logging is enabled.
+     * @param format The format string to use
+     * @param args Optional arguments to be formatted
+     */
+    private static void logDebug (String format, Object... args) {
+        if (Log.isDebugEnabled()) {
+            Log.debug(String.format(format, args));
+        }
+    }
 
     @Override
     public void reset() throws IOException {
@@ -100,7 +110,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
     @Override
     public boolean incrementToken() throws IOException {
         if (!emitSingleTokens && unusedTokens.size() > 0) {
-            Log.debug("emitting unused phrases");
+            logDebug("emitting unused phrases");
             // emit these until the queue is empty before emitting any new stuff
             Token aToken = unusedTokens.remove(0);
             emit(aToken);
@@ -136,7 +146,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
                     currentSetToCheck = null;
                     if (unusedTokens.size() > 0) {
                         Token aToken = unusedTokens.remove(0);
-                        Log.debug("emitting put back token");
+                        logDebug("emitting put back token");
                         emit(aToken);
                         return true;
                     }
@@ -155,7 +165,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
                     currentPhrase.setLength(0);
                     if (unusedTokens.size() > 0) {
                         Token aToken = unusedTokens.remove(0);
-                        Log.debug("emitting put back token");
+                        logDebug("emitting put back token");
                         emit(aToken);
                         return true;
                     }
@@ -170,7 +180,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
         }
 
         if (currentSetToCheck == null || currentSetToCheck.size() == 0) {
-            Log.debug("Checking for phrase start on '" + new String(nextToken) + "'");
+            logDebug("Checking for phrase start on '%s'", nextToken);
 
             if (phraseMap.keySet().contains(nextToken, 0, nextToken.length)) {
                 // get the phrase set for this token, add it to current set to check
@@ -255,14 +265,14 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
 
                 if (unusedTokens.size() > 0) {
                     Token aToken = unusedTokens.remove(0);
-                    Log.debug("emitting put back token");
+                    logDebug("emitting put back token");
                     emit(aToken);
                     return true;
                 }
             }
             currentSetToCheck = null;
 
-            Log.debug("returning at end.");
+            logDebug("returning at end.");
             return incrementToken();
         }
     }
@@ -327,7 +337,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
 
 
     private void emit(char[] token) {
-        Log.debug("emit: " + new String(token));
+        logDebug("emit: %s", token);
 
         token = replaceWhiteSpace(token);
 
@@ -378,10 +388,10 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
         for (Object aPhraseSet : phraseSet) {
             char[] phrase = (char[]) aPhraseSet;
 
-            Log.debug("'" + new String(phrase) + "'");
+            logDebug("'%s'", phrase);
 
             char[] firstTerm = getFirstTerm(phrase);
-            Log.debug("'" + new String(firstTerm) + "'");
+            logDebug("'%s'", firstTerm);
 
             CharArraySet itsPhrases = phraseMap.get(firstTerm, 0, firstTerm.length);
             if (itsPhrases == null) {
@@ -416,7 +426,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
     // need to recompute the token positions based on the length of the currentPhrase,
     // the current ending position and the length of each token.
     private void discardCharTokens(StringBuffer phrase, ArrayList<Token> tokenList) {
-        Log.debug("discardCharTokens: '" + phrase.toString() + "'");
+        logDebug("discardCharTokens: '%s'", phrase);
         int endPos = offsetAttr.endOffset();
         int startPos = endPos - phrase.length();
 
@@ -432,7 +442,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
 
                     token.startPos = startPos + lastSp;
                     token.endPos = token.startPos + tok.length;
-                    Log.debug("discard " + new String(tok) + ": " + token.startPos + ", " + token.endPos);
+                    logDebug("discard %s: %i, %i", tok, token.startPos, token.endPos);
                     tokenList.add(token);
                 }
                 lastSp = i + 1;
