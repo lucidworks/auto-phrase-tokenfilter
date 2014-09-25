@@ -87,12 +87,29 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
 
     /**
      * Logs a debug message and only does a string format if debug logging is enabled.
-     * @param format The format string to use
-     * @param args Optional arguments to be formatted
+     * It doesn't take Object... args because I didn't want to cast the char[] to string to call it
      */
-    private static void logDebug (String format, Object... args) {
+    private static void logDebug (String format) {
+            Log.debug(format);
+    }
+    private static void logDebug (String format, char[] arg) {
         if (Log.isDebugEnabled()) {
-            Log.debug(String.format(format, args));
+            Log.debug(String.format(format, arg == null ? "NULL" : new String(arg)));
+        }
+    }
+    private static void logDebug (String format, int arg) {
+        if (Log.isDebugEnabled()) {
+            Log.debug(String.format(format, arg));
+        }
+    }
+    private static void logDebug (String format, char[] arg0, int arg1, int arg2) {
+        if (Log.isDebugEnabled()) {
+            Log.debug(String.format(format, new String(arg0), arg1, arg2));
+        }
+    }
+    private static void logDebug (String format, StringBuffer arg) {
+        if (Log.isDebugEnabled()) {
+            Log.debug(String.format(format, arg));
         }
     }
 
@@ -110,29 +127,33 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
     @Override
     public boolean incrementToken() throws IOException {
         if (!emitSingleTokens && unusedTokens.size() > 0) {
-            logDebug("emitting unused phrases");
             // emit these until the queue is empty before emitting any new stuff
             Token aToken = unusedTokens.remove(0);
+            logDebug("Emitting unused token: %s", aToken.tok);
             emit(aToken);
             return true;
         }
 
         if (lastToken != null) {
+            logDebug("Emitting last token: %s", lastToken);
             emit(lastToken);
             lastToken = null;
             return true;
         }
 
         char[] nextToken = nextToken();
-        // if (nextToken != null) System.out.println( "nextToken: " + new String( nextToken ));
+        logDebug("nextToken: %s", nextToken);
+
         if (nextToken == null) {
             if (lastValid != null) {
+                logDebug("Emitting last valid token: %s", lastValid);
                 emit(lastValid);
                 lastValid = null;
                 return true;
             }
 
             if (emitSingleTokens && currentSetToCheck != null && currentSetToCheck.size() > 0) {
+                logDebug("Emitting single tokens from current set to check.");
                 char[] phrase = getFirst(currentSetToCheck);
                 char[] lastTok = getCurrentBuffer(new char[0]);
                 if (phrase != null && endsWith(lastTok, phrase)) {
@@ -172,10 +193,11 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
                 }
             }
             return false;
-        }
+        } // nextToken == null
 
         // if emitSingleToken, set lastToken = nextToken
         if (emitSingleTokens) {
+            logDebug("Assigning next token to last token.");
             lastToken = nextToken;
         }
 
@@ -183,15 +205,18 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
             logDebug("Checking for phrase start on '%s'", nextToken);
 
             if (phraseMap.keySet().contains(nextToken, 0, nextToken.length)) {
+                logDebug("Found phrase start on '%s'", nextToken);
                 // get the phrase set for this token, add it to current set to check
                 currentSetToCheck = phraseMap.get(nextToken, 0, nextToken.length);
                 if (currentPhrase == null) currentPhrase = new StringBuffer();
                 else currentPhrase.setLength(0);
                 currentPhrase.append(nextToken);
+
+                logDebug("Calling incrementToken() recursively.");
                 return incrementToken();
             } else {
+                logDebug("No phrase match on '%s'", nextToken);
                 emit(nextToken);
-                // clear lastToken
                 lastToken = null;
                 return true;
             }
@@ -210,8 +235,10 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
                     emit(currentBuffer);
                     lastValid = null;
                     --positionIncrement;
+                    logDebug("Decremented the position increment to: %d", positionIncrement);
                 } else {
                     if (emitSingleTokens) {
+                        logDebug("Setting lastToken to the currentBuffer; %s", currentBuffer);
                         lastToken = currentBuffer;
                         return true;
                     }
@@ -442,7 +469,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
 
                     token.startPos = startPos + lastSp;
                     token.endPos = token.startPos + tok.length;
-                    logDebug("discard %s: %i, %i", tok, token.startPos, token.endPos);
+                    logDebug("discard %s: %d, %d", tok, token.startPos, token.endPos);
                     tokenList.add(token);
                 }
                 lastSp = i + 1;
