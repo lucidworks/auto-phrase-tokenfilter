@@ -158,13 +158,13 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
                 logDebug("Emitting single tokens from current set to check.");
                 char[] phrase = getFirst(currentSetToCheck);
                 char[] lastTok = getCurrentBuffer(new char[0]);
-                if (phrase != null && endsWith(lastTok, phrase)) {
+                if (phrase != null && CharArrayUtil.endsWith(lastTok, phrase)) {
                     currentSetToCheck = remove(phrase);
                     emit(phrase);
                     return true;
                 }
             } else if (!emitSingleTokens && currentSetToCheck != null && currentSetToCheck.size() > 0) {
-                if (lastEmitted != null && !equals(fixWhitespace(lastEmitted), getCurrentBuffer(new char[0]))) {
+                if (lastEmitted != null && !CharArrayUtil.equals(fixWhitespace(lastEmitted), getCurrentBuffer(new char[0]))) {
                     discardCharTokens(currentPhrase, unusedTokens);
                     currentSetToCheck = null;
                     if (unusedTokens.size() > 0) {
@@ -274,7 +274,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
             for (Object aCurrentSetToCheck : currentSetToCheck) {
                 char[] phrase = (char[]) aCurrentSetToCheck;
 
-                if (startsWith(phrase, currentBuffer)) {
+                if (CharArrayUtil.startsWith(phrase, currentBuffer)) {
                     return incrementToken();
                 }
             }
@@ -317,33 +317,6 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
         }
 
         return null;
-    }
-
-    private boolean startsWith(char[] buffer, char[] phrase) {
-        if (phrase.length > buffer.length) return false;
-        for (int i = 0; i < phrase.length; i++) {
-            if (buffer[i] != phrase[i]) return false;
-        }
-        return true;
-    }
-
-    private boolean equals(char[] buffer, char[] phrase) {
-        if (phrase.length != buffer.length) return false;
-        for (int i = 0; i < phrase.length; i++) {
-            if (buffer[i] != phrase[i]) return false;
-        }
-        return true;
-    }
-
-
-    private boolean endsWith(char[] buffer, char[] phrase) {
-        if (buffer == null || phrase == null) return false;
-
-        if (phrase.length >= buffer.length) return false;
-        for (int i = 1; i < phrase.length - 1; ++i) {
-            if (buffer[buffer.length - i] != phrase[phrase.length - i]) return false;
-        }
-        return true;
     }
 
     private char[] getCurrentBuffer(char[] newToken) {
@@ -467,7 +440,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
             if (isSpaceChar(chAt) && i > lastSp) {
                 char[] tok = new char[i - lastSp];
                 phrase.getChars(lastSp, i, tok, 0);
-                if (lastEmitted == null || !endsWith(lastEmitted, tok)) {
+                if (lastEmitted == null || !CharArrayUtil.endsWith(lastEmitted, tok)) {
                     Token token = new Token();
                     token.tok = tok;
 
@@ -494,7 +467,10 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
         for (Object aCurrentSetToCheck : currentSetToCheck) {
             char[] phrase = (char[]) aCurrentSetToCheck;
 
-            if (!equals(phrase, charArray) && startsWith(phrase, charArray) || endsWith(charArray, phrase)) {
+            /* There is a bug here for overlapping phrases when emitting single tokens
+             *  the implementation seems to conflict with itself for overlapping phrases at the start and end of a token stream
+             *  and it worked originally because of a bug with endsWith that cause a worse thing to happen. */
+            if (!CharArrayUtil.equals(charArray, phrase)/* && !(CharArrayUtil.startsWith(charArray, phrase) || CharArrayUtil.endsWith(charArray, phrase))*/) {
                 newSet.add(phrase);
             }
         }
