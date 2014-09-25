@@ -61,6 +61,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
     private Character replaceWhitespaceWith = null;
 
     private int positionIncrement = 0;
+    private int lastEndPos = 0;
 
     @SuppressWarnings("UnusedParameters")
     public AutoPhrasingTokenFilter(Version matchVersion, TokenStream input, CharArraySet phraseSet, boolean emitSingleTokens) {
@@ -141,6 +142,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
             return true;
         }
 
+        lastEndPos = offsetAttr.endOffset();
         char[] nextToken = nextToken();
         logDebug("nextToken: %s", nextToken);
 
@@ -455,6 +457,8 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
     private void discardCharTokens(StringBuffer phrase, ArrayList<Token> tokenList) {
         logDebug("discardCharTokens: '%s'", phrase);
         int endPos = offsetAttr.endOffset();
+        if (endPos == 0)
+            endPos = lastEndPos;
         int startPos = endPos - phrase.length();
 
         int lastSp = 0;
