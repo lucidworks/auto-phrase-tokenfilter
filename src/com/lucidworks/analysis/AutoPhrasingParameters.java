@@ -14,21 +14,17 @@ public class AutoPhrasingParameters {
     private final String DefaultDownstreamParser = "lucene";
     private final Character DefaultReplaceWhitespaceWith = null;
     private final boolean DefaultIgnoreCase = true;
-    private final boolean DefaultEmitSingleTokens = false;
-
     public AutoPhrasingParameters(SolrParams solrParams) {
         if (solrParams == null) {
             downstreamParser = DefaultDownstreamParser;
             replaceWhitespaceWith = DefaultReplaceWhitespaceWith;
             ignoreCase = DefaultIgnoreCase;
             phraseSetFiles = null;
-            emitSingleTokens = DefaultEmitSingleTokens;
         } else {
             setDownstreamParser(solrParams.get("defType", DefaultDownstreamParser));
             setReplaceWhitespaceWith(solrParams.get("replaceWhitespaceWith", null));
             setIgnoreCase(solrParams.getBool("ignoreCase", DefaultIgnoreCase));
             setPhraseSetFiles(solrParams.get("phrases"));
-            setEmitSingleTokens(solrParams.getBool("includeTokens", DefaultEmitSingleTokens));
         }
     }
 
@@ -88,17 +84,8 @@ public class AutoPhrasingParameters {
         this.downstreamParser = downstreamParser;
     }
 
-    public boolean getEmitSingleTokens() {
-        return emitSingleTokens;
-    }
-
-    public void setEmitSingleTokens(boolean emitSingleTokens) {
-        this.emitSingleTokens = emitSingleTokens;
-    }
-
     private String downstreamParser;
     private Character replaceWhitespaceWith;
     private boolean ignoreCase;
     private String phraseSetFiles;
-    private boolean emitSingleTokens;
 }

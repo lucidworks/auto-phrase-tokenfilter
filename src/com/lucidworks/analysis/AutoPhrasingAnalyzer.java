@@ -14,16 +14,14 @@ import java.io.Reader;
 public class AutoPhrasingAnalyzer extends Analyzer {
 
     private CharArraySet phraseSets;
-    private boolean emitSingleTokens = false;
     private Character replaceWhitespaceWith = null;
 
-    public AutoPhrasingAnalyzer(CharArraySet phraseSets, boolean emitSingleTokens) {
-        this(phraseSets, emitSingleTokens, null);
+    public AutoPhrasingAnalyzer(CharArraySet phraseSets) {
+        this(phraseSets, null);
     }
 
-    public AutoPhrasingAnalyzer(CharArraySet phraseSets, boolean emitSingleTokens, Character replaceWhitespaceWith) {
+    public AutoPhrasingAnalyzer(CharArraySet phraseSets, Character replaceWhitespaceWith) {
         this.phraseSets = phraseSets;
-        this.emitSingleTokens = emitSingleTokens;
         this.replaceWhitespaceWith = replaceWhitespaceWith;
     }
 
@@ -31,7 +29,7 @@ public class AutoPhrasingAnalyzer extends Analyzer {
     protected TokenStreamComponents createComponents(String s, Reader reader) {
         Tokenizer tokenizer = new WhitespaceTokenizer(Version.LUCENE_48, reader);
         AutoPhrasingTokenFilter tokenFilter =
-                new AutoPhrasingTokenFilter(Version.LUCENE_48, tokenizer, phraseSets, emitSingleTokens);
+                new AutoPhrasingTokenFilter(Version.LUCENE_48, tokenizer, phraseSets);
         tokenFilter.setReplaceWhitespaceWith(replaceWhitespaceWith);
         return new TokenStreamComponents(tokenizer, tokenFilter);
     }

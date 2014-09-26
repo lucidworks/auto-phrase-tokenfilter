@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import static java.lang.System.arraycopy;
 
@@ -51,9 +50,6 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
     // work 'transparently'
     private ArrayList<Token> unusedTokens = new ArrayList<Token>();
 
-    // If true - emit single tokens as well as auto-phrases
-    private boolean emitSingleTokens;
-
     private char[] lastToken = null;
     private char[] lastEmitted = null;
     private char[] lastValid = null;
@@ -64,7 +60,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
     private int lastEndPos = 0;
 
     @SuppressWarnings("UnusedParameters")
-    public AutoPhrasingTokenFilter(Version matchVersion, TokenStream input, CharArraySet phraseSet, boolean emitSingleTokens) {
+    public AutoPhrasingTokenFilter(Version matchVersion, TokenStream input, CharArraySet phraseSet) {
         super(input);
 
         initializeAttributes();
@@ -73,7 +69,6 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
         // putting them into the CharArrayMap with Integer of the number
         // of tokens in the map: need this to determine when a phrase match is completed.
         this.phraseMap = convertPhraseSet(phraseSet);
-        this.emitSingleTokens = emitSingleTokens;
     }
 
     private void initializeAttributes() {
@@ -129,7 +124,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
     public boolean incrementToken() throws IOException {
         clearAttributes();
 
-        if (!emitSingleTokens && unusedTokens.size() > 0) {
+        if (unusedTokens.size() > 0) {
             // emit these until the queue is empty before emitting any new stuff
             Token aToken = unusedTokens.remove(0);
             logDebug("Emitting unused token: %s", aToken.tok);
@@ -156,16 +151,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
                 return true;
             }
 
-            if (emitSingleTokens && currentSetToCheck != null && currentSetToCheck.size() > 0) {
-                logDebug("Emitting single tokens from current set to check.");
-                char[] phrase = getFirst(currentSetToCheck);
-                char[] lastTok = getCurrentBuffer(new char[0]);
-                if (phrase != null && CharArrayUtil.endsWith(lastTok, phrase)) {
-                    currentSetToCheck = remove(phrase);
-                    emit(phrase);
-                    return true;
-                }
-            } else if (!emitSingleTokens && currentSetToCheck != null && currentSetToCheck.size() > 0) {
+            if (currentSetToCheck != null && currentSetToCheck.size() > 0) {
                 if (lastEmitted != null && !CharArrayUtil.equals(fixWhitespace(lastEmitted), getCurrentBuffer(new char[0]))) {
                     discardCharTokens(currentPhrase, unusedTokens);
                     currentSetToCheck = null;
@@ -184,7 +170,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
                     emit(lastTok);
                     currentPhrase.setLength(0);
                     return true;
-                } else if (!emitSingleTokens) {
+                } else {
                     discardCharTokens(currentPhrase, unusedTokens);
                     currentSetToCheck = null;
                     currentPhrase.setLength(0);
@@ -198,12 +184,6 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
             }
             return false;
         } // nextToken == null
-
-        // if emitSingleToken, set lastToken = nextToken
-        if (emitSingleTokens) {
-            logDebug("Assigning next token to last token.");
-            lastToken = nextToken;
-        }
 
         if (currentSetToCheck == null || currentSetToCheck.size() == 0) {
             logDebug("Checking for phrase start on '%s'", nextToken);
@@ -241,11 +221,6 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
                     --positionIncrement;
                     logDebug("Decremented the position increment to: %d", positionIncrement);
                 } else {
-                    if (emitSingleTokens) {
-                        logDebug("Setting lastToken to the currentBuffer; %s", currentBuffer);
-                        lastToken = currentBuffer;
-                        return true;
-                    }
                     lastValid = currentBuffer;
                 }
 
@@ -287,20 +262,20 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
                 return true;
             }
 
-            if (!emitSingleTokens) {
-                // current phrase didn't match fully: put the tokens back
-                // into the unusedTokens list
-                discardCharTokens(currentPhrase, unusedTokens);
-                currentPhrase.setLength(0);
-                currentSetToCheck = null;
 
-                if (unusedTokens.size() > 0) {
-                    Token aToken = unusedTokens.remove(0);
-                    logDebug("emitting put back token");
-                    emit(aToken);
-                    return true;
-                }
+            // current phrase didn't match fully: put the tokens back
+            // into the unusedTokens list
+            discardCharTokens(currentPhrase, unusedTokens);
+            currentPhrase.setLength(0);
+            currentSetToCheck = null;
+
+            if (unusedTokens.size() > 0) {
+                Token aToken = unusedTokens.remove(0);
+                logDebug("emitting put back token");
+                emit(aToken);
+                return true;
             }
+
             currentSetToCheck = null;
 
             logDebug("returning at end.");
@@ -331,12 +306,6 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
         char[] currentBuff = new char[currentPhrase.length()];
         currentPhrase.getChars(0, currentPhrase.length(), currentBuff, 0);
         return currentBuff;
-    }
-
-    private char[] getFirst(CharArraySet charSet) {
-        if (charSet.isEmpty()) return null;
-        Iterator<Object> phraseIt = charSet.iterator();
-        return (char[]) phraseIt.next();
     }
 
 

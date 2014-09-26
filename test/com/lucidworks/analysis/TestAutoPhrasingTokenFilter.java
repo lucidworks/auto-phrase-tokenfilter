@@ -1,5 +1,6 @@
 package com.lucidworks.analysis;
 
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.BaseTokenStreamTestCase;
 import org.apache.lucene.analysis.core.WhitespaceTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
@@ -10,104 +11,28 @@ import java.util.Arrays;
 
 public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
 
-    public void testAutoPhrase() throws Exception {
-        final CharArraySet phraseSets = new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(
-                "income tax", "tax refund", "property tax"
-        ), false);
-
-        final String input = "what is my income tax refund this year now that my property tax is so high";
-        WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
-        AutoPhrasingTokenFilter autoPhrasingTokenFilter =
-                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets, false);
-        autoPhrasingTokenFilter.setReplaceWhitespaceWith('_');
-        CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
-        autoPhrasingTokenFilter.reset();
-
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("what", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("is", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("my", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("income_tax", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("tax_refund", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("this", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("year", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("now", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("that", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("my", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("property_tax", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("is", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("so", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("high", term.toString());
-
-        assertFalse(autoPhrasingTokenFilter.incrementToken());
+    private static CharArraySet getPhraseSets(String... phrases) {
+        return new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(phrases), false);
     }
 
-    public void testAutoPhraseEmitSingle() throws Exception {
-        final CharArraySet phraseSets = new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(
-                "income tax", "tax refund", "property tax"
-        ), false);
+    public void testSomething() throws Exception {
+        final CharArraySet phrases = getPhraseSets("big apple", "new york city", "property tax", "three word phrase");
+        final String input = "something big orange";
 
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"something", "big", "orange"});
+    }
+
+    public void testAutoPhrase() throws Exception {
+        final CharArraySet phrases = getPhraseSets("income tax", "tax refund", "property tax");
         final String input = "what is my income tax refund this year now that my property tax is so high";
-        WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
-        AutoPhrasingTokenFilter autoPhrasingTokenFilter =
-                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets, true);
-        autoPhrasingTokenFilter.setReplaceWhitespaceWith('_');
-        CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
-        autoPhrasingTokenFilter.reset();
+        final Character replaceWhitespaceWith = '_';
 
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("what", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("is", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("my", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("income", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("income_tax", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("tax", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("tax_refund", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("refund", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("this", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("year", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("now", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("that", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("my", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("property", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("property_tax", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("tax", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("is", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("so", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("high", term.toString());
-
-        assertFalse(autoPhrasingTokenFilter.incrementToken());
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases, replaceWhitespaceWith);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"what", "is", "my", "income_tax", "tax_refund", "this", "year", "now", "that", "my",
+                        "property_tax", "is", "so", "high"});
     }
 
     public void testOverlappingAtBeginning() throws Exception {
@@ -118,7 +43,7 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
         final String input = "new york city is great";
         WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
         AutoPhrasingTokenFilter autoPhrasingTokenFilter =
-                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets, false);
+                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets);
         autoPhrasingTokenFilter.setReplaceWhitespaceWith('_');
         CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
         autoPhrasingTokenFilter.reset();
@@ -129,73 +54,6 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
         assertEquals("is", term.toString());
         assertTrue(autoPhrasingTokenFilter.incrementToken());
         assertEquals("great", term.toString());
-
-        assertFalse(autoPhrasingTokenFilter.incrementToken());
-    }
-
-    public void testOverlappingAtBeginningEmitSingle() throws Exception {
-        final CharArraySet phraseSets = new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(
-                "new york", "new york city", "city of new york"
-        ), false);
-
-
-        final String input = "new york city is great";
-        WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
-        AutoPhrasingTokenFilter autoPhrasingTokenFilter =
-                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets, true);
-        autoPhrasingTokenFilter.setReplaceWhitespaceWith('_');
-        CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
-        autoPhrasingTokenFilter.reset();
-
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("new", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("york", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("new_york", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("new_york_city", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("city", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("is", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("great", term.toString());
-
-        assertFalse(autoPhrasingTokenFilter.incrementToken());
-    }
-
-    public void testOverlappingAtEndEmitSingle() throws Exception {
-        final CharArraySet phraseSets = new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(
-                "new york", "new york city", "city of new york"
-        ), false);
-
-        final String input = "the great city of new york";
-
-        WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
-        AutoPhrasingTokenFilter autoPhrasingTokenFilter =
-                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets, true);
-        autoPhrasingTokenFilter.setReplaceWhitespaceWith('_');
-        CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
-        autoPhrasingTokenFilter.reset();
-
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("the", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("great", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("city", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("of", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("new", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("york", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("city_of_new_york", term.toString());
-        //bug here cause by fixing the endsWith method of CharArrayUtil, implementation conflicts with itself
-        //assertTrue(autoPhrasingTokenFilter.incrementToken());
-        //assertEquals("new_york", term.toString());
 
         assertFalse(autoPhrasingTokenFilter.incrementToken());
     }
@@ -209,7 +67,7 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
 
         WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
         AutoPhrasingTokenFilter autoPhrasingTokenFilter =
-                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets, false);
+                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets);
         autoPhrasingTokenFilter.setReplaceWhitespaceWith('_');
         CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
         autoPhrasingTokenFilter.reset();
@@ -233,7 +91,7 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
 
         WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
         AutoPhrasingTokenFilter autoPhrasingTokenFilter =
-                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets, false);
+                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets);
         autoPhrasingTokenFilter.setReplaceWhitespaceWith('_');
         CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
         autoPhrasingTokenFilter.reset();
@@ -255,7 +113,7 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
 
         WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
         AutoPhrasingTokenFilter autoPhrasingTokenFilter =
-                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets, false);
+                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets);
         autoPhrasingTokenFilter.setReplaceWhitespaceWith(null);
         CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
         autoPhrasingTokenFilter.reset();
@@ -279,7 +137,7 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
 
         WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
         AutoPhrasingTokenFilter autoPhrasingTokenFilter =
-                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets, false);
+                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets);
         autoPhrasingTokenFilter.setReplaceWhitespaceWith(null);
         CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
         autoPhrasingTokenFilter.reset();
@@ -299,7 +157,7 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
 
         WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
         AutoPhrasingTokenFilter autoPhrasingTokenFilter =
-                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets, false);
+                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets);
         autoPhrasingTokenFilter.setReplaceWhitespaceWith(null);
         CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
         autoPhrasingTokenFilter.reset();
@@ -321,7 +179,7 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
 
         WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
         AutoPhrasingTokenFilter autoPhrasingTokenFilter =
-                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets, false);
+                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets);
         autoPhrasingTokenFilter.setReplaceWhitespaceWith(null);
         CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
         autoPhrasingTokenFilter.reset();
@@ -343,7 +201,7 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
 
         WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
         AutoPhrasingTokenFilter autoPhrasingTokenFilter =
-                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets, false);
+                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets);
         autoPhrasingTokenFilter.setReplaceWhitespaceWith(null);
         CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
         autoPhrasingTokenFilter.reset();
@@ -367,7 +225,7 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
 
         WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
         AutoPhrasingTokenFilter autoPhrasingTokenFilter =
-                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets, false);
+                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets);
         autoPhrasingTokenFilter.setReplaceWhitespaceWith(null);
         CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
         autoPhrasingTokenFilter.reset();

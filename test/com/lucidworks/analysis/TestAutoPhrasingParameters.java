@@ -10,7 +10,6 @@ public class TestAutoPhrasingParameters extends TestCase {
     private final String DefaultDownstreamParser = "lucene";
     private final Character DefaultReplaceWhitespaceWith = null;
     private final boolean DefaultIgnoreCase = true;
-    private final boolean DefaultEmitSingleTokens = false;
     private final String DefaultPhraseSetFiles = null;
 
     private final String DownstreamParser = "edismax";
@@ -18,7 +17,6 @@ public class TestAutoPhrasingParameters extends TestCase {
     private final boolean IgnoreCase = false;
     private final String PhrasesOneFile = "phrases.txt";
     private final String PhrasesMultipleFiles = "phrases.txt,more_phrases.txt";
-    private final boolean EmitSingleTokens = true;
 
     public void testConstructorNullSolrParams(){
         AutoPhrasingParameters autoPhrasingParameters = new AutoPhrasingParameters(null);
@@ -28,7 +26,6 @@ public class TestAutoPhrasingParameters extends TestCase {
         assertEquals(DefaultIgnoreCase, autoPhrasingParameters.getIgnoreCase());
         assertEquals(DefaultPhraseSetFiles, autoPhrasingParameters.getPhraseSetFiles());
         assertEquals(0, autoPhrasingParameters.getIndividualPhraseSetFiles().size());
-        assertEquals(DefaultEmitSingleTokens, autoPhrasingParameters.getEmitSingleTokens());
     }
 
     public void testConstructorWithSolrParams() {
@@ -41,7 +38,6 @@ public class TestAutoPhrasingParameters extends TestCase {
         assertEquals(PhrasesOneFile, autoPhrasingParameters.getPhraseSetFiles());
         assertEquals(1, autoPhrasingParameters.getIndividualPhraseSetFiles().size());
         assertEquals(PhrasesOneFile, autoPhrasingParameters.getIndividualPhraseSetFiles().get(0));
-        assertEquals(EmitSingleTokens, autoPhrasingParameters.getEmitSingleTokens());
     }
 
     public void testConstructorNoIgnoreCase(){
@@ -54,20 +50,6 @@ public class TestAutoPhrasingParameters extends TestCase {
         assertEquals(PhrasesOneFile, autoPhrasingParameters.getPhraseSetFiles());
         assertEquals(1, autoPhrasingParameters.getIndividualPhraseSetFiles().size());
         assertEquals(PhrasesOneFile, autoPhrasingParameters.getIndividualPhraseSetFiles().get(0));
-        assertEquals(EmitSingleTokens, autoPhrasingParameters.getEmitSingleTokens());
-    }
-
-    public void testConstructorNoEmitSingleTokens(){
-        SolrParams solrParams = getSolrParamsNoEmitSingleTokens();
-        AutoPhrasingParameters autoPhrasingParameters = new AutoPhrasingParameters(solrParams);
-        assertNotNull(autoPhrasingParameters);
-        assertEquals(DownstreamParser, autoPhrasingParameters.getDownstreamParser());
-        assertEquals(ReplaceWhitespaceWith, autoPhrasingParameters.getReplaceWhitespaceWith());
-        assertEquals(IgnoreCase, autoPhrasingParameters.getIgnoreCase());
-        assertEquals(1, autoPhrasingParameters.getIndividualPhraseSetFiles().size());
-        assertEquals(PhrasesOneFile, autoPhrasingParameters.getPhraseSetFiles());
-        assertEquals(PhrasesOneFile, autoPhrasingParameters.getIndividualPhraseSetFiles().get(0));
-        assertEquals(DefaultEmitSingleTokens, autoPhrasingParameters.getEmitSingleTokens());
     }
 
     public void testConstructorWithSolrParamsMultiplePhraseSetFiles() {
@@ -89,7 +71,6 @@ public class TestAutoPhrasingParameters extends TestCase {
         params.add("replaceWhitespaceWith", ReplaceWhitespaceWith);
         params.add("ignoreCase", IgnoreCase);
         params.add("phrases", PhrasesOneFile);
-        params.add("includeTokens", EmitSingleTokens);
 
         return SolrParams.toSolrParams(params);
     }
@@ -100,7 +81,6 @@ public class TestAutoPhrasingParameters extends TestCase {
         params.add("replaceWhitespaceWith", ReplaceWhitespaceWith);
         params.add("ignoreCase", IgnoreCase);
         params.add("phrases", PhrasesMultipleFiles);
-        params.add("includeTokens", EmitSingleTokens);
 
         return SolrParams.toSolrParams(params);
     }
@@ -109,17 +89,6 @@ public class TestAutoPhrasingParameters extends TestCase {
         NamedList<Serializable> params  = new NamedList<Serializable>();
         params.add("defType", DownstreamParser);
         params.add("replaceWhitespaceWith", ReplaceWhitespaceWith);
-        params.add("phrases", PhrasesOneFile);
-        params.add("includeTokens", EmitSingleTokens);
-
-        return SolrParams.toSolrParams(params);
-    }
-
-    private SolrParams getSolrParamsNoEmitSingleTokens() {
-        NamedList<Serializable> params  = new NamedList<Serializable>();
-        params.add("defType", DownstreamParser);
-        params.add("replaceWhitespaceWith", ReplaceWhitespaceWith);
-        params.add("ignoreCase", IgnoreCase);
         params.add("phrases", PhrasesOneFile);
 
         return SolrParams.toSolrParams(params);
