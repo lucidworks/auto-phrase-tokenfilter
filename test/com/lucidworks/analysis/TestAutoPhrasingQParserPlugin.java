@@ -314,7 +314,6 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
         List<String> phrases = new ArrayList<String>();
         phrases.add("hi there");
         phrases.add("wheel chair");
-        phrases.add("something"); // to test adding a single word that might be processed
         phrases.add("more than one space");
         phrases.add("dup licate");
         phrases.add("dup licate");

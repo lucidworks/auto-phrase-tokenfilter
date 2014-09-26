@@ -124,7 +124,8 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
             }
 
             if (currentSetToCheck != null && currentSetToCheck.size() > 0) {
-                if (lastEmitted != null && !CharArrayUtil.equals(fixWhitespace(lastEmitted), getCurrentBuffer(new char[0]))) {
+                if (lastEmitted != null && !CharArrayUtil.equals(
+                        CharArrayUtil.replaceWhitespace(lastEmitted, replaceWhitespaceWith), getCurrentBuffer(new char[0]))) {
                     discardCharTokens(currentPhrase, unusedTokens);
                     currentSetToCheck = null;
                     if (unusedTokens.size() > 0) {
@@ -289,7 +290,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
     private void emit(char[] token) {
         LazyLog.logDebug("emit: %s", token);
 
-        token = replaceWhiteSpace(token);
+        token = CharArrayUtil.replaceWhitespaceRemoveSpaceForNullReplaceWith(token, replaceWhitespaceWith);
 
         charTermAttr.setEmpty();
         charTermAttr.append(new StringBuilder().append(token));
@@ -313,28 +314,6 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
         }
     }
 
-    // replaces whitespace char with replaceWhitespaceWith
-    private char[] replaceWhiteSpace(char[] token) {
-        char[] replaced = new char[token.length];
-        int srcPos, destPos;
-        for (srcPos = 0, destPos = 0; srcPos < token.length; srcPos++) {
-            if (token[srcPos] == ' ') {
-                if (replaceWhitespaceWith == null) {
-                    continue;
-                }
-                replaced[destPos++] = replaceWhitespaceWith;
-            } else {
-                replaced[destPos++] = token[srcPos];
-            }
-        }
-        if (srcPos != destPos){
-            char[] shorterReplaced = new char[destPos];
-            System.arraycopy(replaced, 0, shorterReplaced, 0, destPos);
-            return shorterReplaced;
-        }
-        return replaced;
-    }
-
     private CharArrayMap convertPhraseSet(CharArraySet phraseSet) {
         CharArrayMap<CharArraySet> phraseMap = new CharArrayMap(Version.LUCENE_48, 100, false);
         for (Object aPhraseSet : phraseSet) {
@@ -342,7 +321,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
 
             LazyLog.logDebug("'%s'", phrase);
 
-            char[] firstTerm = getFirstTerm(phrase);
+            char[] firstTerm = CharArrayUtil.getFirstTerm(phrase);
             LazyLog.logDebug("'%s'", firstTerm);
 
             CharArraySet itsPhrases = phraseMap.get(firstTerm, 0, firstTerm.length);
@@ -355,23 +334,6 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
         }
 
         return phraseMap;
-    }
-
-    private char[] getFirstTerm(char[] phrase) {
-        int spNdx = 0;
-        while (spNdx < phrase.length) {
-            if (isSpaceChar(phrase[spNdx++])) {
-                break;
-            }
-        }
-
-        char[] firstCh = new char[spNdx - 1];
-        arraycopy(phrase, 0, firstCh, 0, spNdx - 1);
-        return firstCh;
-    }
-
-    private boolean isSpaceChar(char ch) {
-        return " \t\n\r".indexOf(ch) >= 0;
     }
 
     // reconstruct the unused tokens from the phrase (since it didn't match)
@@ -387,7 +349,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
         int lastSp = 0;
         for (int i = 0; i < phrase.length(); i++) {
             char chAt = phrase.charAt(i);
-            if (isSpaceChar(chAt) && i > lastSp) {
+            if (CharArrayUtil.isSpaceChar(chAt) && i > lastSp) {
                 char[] tok = new char[i - lastSp];
                 phrase.getChars(lastSp, i, tok, 0);
                 if (lastEmitted == null || !CharArrayUtil.endsWith(lastEmitted, tok)) {
@@ -426,19 +388,6 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
         }
 
         return newSet;
-    }
-
-    private char[] fixWhitespace(char[] phrase) {
-        if (replaceWhitespaceWith == null) return phrase;
-        char[] fixed = new char[phrase.length];
-        for (int i = 0; i < phrase.length; i++) {
-            if (phrase[i] == replaceWhitespaceWith) {
-                fixed[i] = ' ';
-            } else {
-                fixed[i] = phrase[i];
-            }
-        }
-        return fixed;
     }
 
     class Token {

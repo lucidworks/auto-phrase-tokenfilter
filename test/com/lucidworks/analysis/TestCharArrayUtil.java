@@ -137,4 +137,59 @@ public class TestCharArrayUtil extends TestCase {
         char[] phrase = "same".toCharArray();
         assertTrue(CharArrayUtil.equals(buffer, phrase));
     }
+
+    public void testIsSpaceSpace() throws Exception {
+        assertTrue(CharArrayUtil.isSpaceChar(' '));
+    }
+
+    public void testIsSpaceTab() throws Exception {
+        assertTrue(CharArrayUtil.isSpaceChar('\t'));
+    }
+
+    public void testIsSpaceReturn() throws Exception {
+        assertTrue(CharArrayUtil.isSpaceChar('\r'));
+    }
+
+    public void testIsSpaceNewline() throws Exception {
+        assertTrue(CharArrayUtil.isSpaceChar('\n'));
+    }
+
+    public void testIsSpaceNotSpace() throws Exception {
+        assertFalse(CharArrayUtil.isSpaceChar('a'));
+    }
+
+    public void testGetFirstTermTwoTerms() throws Exception {
+        char[] input = "two terms".toCharArray();
+        char[] expected = "two".toCharArray();
+        char[] actual = CharArrayUtil.getFirstTerm(input);
+        assertEquals(new String(expected), new String(actual));
+    }
+
+    public void testGetFirstTermOneTerm() throws Exception {
+        char[] input = "one".toCharArray();
+        char[] expected = "one".toCharArray();
+        char[] actual = CharArrayUtil.getFirstTerm(input);
+        assertEquals(new String(expected), new String(actual));
+    }
+
+    public void testGetFirstTermEmpty() throws Exception {
+        char[] input = "".toCharArray();
+        char[] expected = "".toCharArray();
+        char[] actual = CharArrayUtil.getFirstTerm(input);
+        assertEquals(new String(expected), new String(actual));
+    }
+
+    public void testGetFirstTermOneLetter() throws Exception {
+        char[] input = "a".toCharArray();
+        char[] expected = "a".toCharArray();
+        char[] actual = CharArrayUtil.getFirstTerm(input);
+        assertEquals(new String(expected), new String(actual));
+    }
+
+    public void testGetFirstTermManyTerms() throws Exception {
+        char[] input = "here is a big list of things because why not?".toCharArray();
+        char[] expected = "here".toCharArray();
+        char[] actual = CharArrayUtil.getFirstTerm(input);
+        assertEquals(new String(expected), new String(actual));
+    }
 }
