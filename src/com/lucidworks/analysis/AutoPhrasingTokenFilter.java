@@ -127,6 +127,8 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
 
     @Override
     public boolean incrementToken() throws IOException {
+        clearAttributes();
+
         if (!emitSingleTokens && unusedTokens.size() > 0) {
             // emit these until the queue is empty before emitting any new stuff
             Token aToken = unusedTokens.remove(0);
