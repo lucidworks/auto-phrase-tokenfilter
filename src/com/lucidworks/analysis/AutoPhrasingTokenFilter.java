@@ -8,8 +8,6 @@ import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.analysis.util.CharArrayMap;
 import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.util.Version;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -28,8 +26,6 @@ import static java.lang.System.arraycopy;
 
 @SuppressWarnings({"unchecked", "PrimitiveArrayArgumentToVariableArgMethod"})
 public final class AutoPhrasingTokenFilter extends TokenFilter {
-
-    private static final Logger Log = LoggerFactory.getLogger(AutoPhrasingTokenFilter.class);
 
     private CharTermAttribute charTermAttr;
     private PositionIncrementAttribute positionIncrementAttr;
@@ -82,34 +78,6 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
         this.replaceWhitespaceWith = replaceWhitespaceWith;
     }
 
-    /**
-     * Logs a debug message and only does a string format if debug logging is enabled.
-     * It doesn't take Object... args because I didn't want to cast the char[] to string to call it
-     */
-    private static void logDebug (String format) {
-            Log.debug(format);
-    }
-    private static void logDebug (String format, char[] arg) {
-        if (Log.isDebugEnabled()) {
-            Log.debug(String.format(format, arg == null ? "NULL" : new String(arg)));
-        }
-    }
-    private static void logDebug (String format, int arg) {
-        if (Log.isDebugEnabled()) {
-            Log.debug(String.format(format, arg));
-        }
-    }
-    private static void logDebug (String format, char[] arg0, int arg1, int arg2) {
-        if (Log.isDebugEnabled()) {
-            Log.debug(String.format(format, new String(arg0), arg1, arg2));
-        }
-    }
-    private static void logDebug (String format, StringBuffer arg) {
-        if (Log.isDebugEnabled()) {
-            Log.debug(String.format(format, arg));
-        }
-    }
-
     @Override
     public void reset() throws IOException {
         currentSetToCheck = null;
@@ -128,13 +96,13 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
         if (unusedTokens.size() > 0) {
             // emit these until the queue is empty before emitting any new stuff
             Token aToken = unusedTokens.remove(0);
-            logDebug("Emitting unused token: %s", aToken.tok);
+            LazyLog.logDebug("Emitting unused token: %s", aToken.tok);
             emit(aToken);
             return true;
         }
 
         if (lastToken != null) {
-            logDebug("Emitting last token: %s", lastToken);
+            LazyLog.logDebug("Emitting last token: %s", lastToken);
             emit(lastToken);
             lastToken = null;
             return true;
@@ -142,14 +110,14 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
 
         char[] nextToken = nextToken();
         saveOffsets();
-        logDebug("nextToken: %s", nextToken);
+        LazyLog.logDebug("nextToken: %s", nextToken);
 
         if (nextToken == null) {
             // restore offsets
             offsetAttr.setOffset(lastStartPos, lastEndPos);
 
             if (lastValid != null) {
-                logDebug("Emitting last valid token: %s", lastValid);
+                LazyLog.logDebug("Emitting last valid token: %s", lastValid);
                 emit(lastValid);
                 lastValid = null;
                 return true;
@@ -161,7 +129,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
                     currentSetToCheck = null;
                     if (unusedTokens.size() > 0) {
                         Token aToken = unusedTokens.remove(0);
-                        logDebug("emitting put back token");
+                        LazyLog.logDebug("emitting put back token");
                         emit(aToken);
                         return true;
                     }
@@ -180,7 +148,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
                     currentPhrase.setLength(0);
                     if (unusedTokens.size() > 0) {
                         Token aToken = unusedTokens.remove(0);
-                        logDebug("emitting put back token");
+                        LazyLog.logDebug("emitting put back token");
                         emit(aToken);
                         return true;
                     }
@@ -190,20 +158,20 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
         } // nextToken == null
 
         if (currentSetToCheck == null || currentSetToCheck.size() == 0) {
-            logDebug("Checking for phrase start on '%s'", nextToken);
+            LazyLog.logDebug("Checking for phrase start on '%s'", nextToken);
 
             if (phraseMap.keySet().contains(nextToken, 0, nextToken.length)) {
-                logDebug("Found phrase start on '%s'", nextToken);
+                LazyLog.logDebug("Found phrase start on '%s'", nextToken);
                 // get the phrase set for this token, add it to current set to check
                 currentSetToCheck = phraseMap.get(nextToken, 0, nextToken.length);
                 if (currentPhrase == null) currentPhrase = new StringBuffer();
                 else currentPhrase.setLength(0);
                 currentPhrase.append(nextToken);
 
-                logDebug("Calling incrementToken() recursively.");
+                LazyLog.logDebug("Calling incrementToken() recursively.");
                 return incrementToken();
             } else {
-                logDebug("No phrase match on '%s'", nextToken);
+                LazyLog.logDebug("No phrase match on '%s'", nextToken);
                 emit(nextToken);
                 lastToken = null;
                 return true;
@@ -223,7 +191,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
                     emit(currentBuffer);
                     lastValid = null;
                     --positionIncrement;
-                    logDebug("Decremented the position increment to: %d", positionIncrement);
+                    LazyLog.logDebug("Decremented the position increment to: %d", positionIncrement);
                 } else {
                     lastValid = currentBuffer;
                 }
@@ -275,14 +243,14 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
 
             if (unusedTokens.size() > 0) {
                 Token aToken = unusedTokens.remove(0);
-                logDebug("emitting put back token");
+                LazyLog.logDebug("emitting put back token");
                 emit(aToken);
                 return true;
             }
 
             currentSetToCheck = null;
 
-            logDebug("returning at end.");
+            LazyLog.logDebug("returning at end.");
             return incrementToken();
         }
     }
@@ -319,7 +287,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
 
 
     private void emit(char[] token) {
-        logDebug("emit: %s", token);
+        LazyLog.logDebug("emit: %s", token);
 
         token = replaceWhiteSpace(token);
 
@@ -372,10 +340,10 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
         for (Object aPhraseSet : phraseSet) {
             char[] phrase = (char[]) aPhraseSet;
 
-            logDebug("'%s'", phrase);
+            LazyLog.logDebug("'%s'", phrase);
 
             char[] firstTerm = getFirstTerm(phrase);
-            logDebug("'%s'", firstTerm);
+            LazyLog.logDebug("'%s'", firstTerm);
 
             CharArraySet itsPhrases = phraseMap.get(firstTerm, 0, firstTerm.length);
             if (itsPhrases == null) {
@@ -410,7 +378,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
     // need to recompute the token positions based on the length of the currentPhrase,
     // the current ending position and the length of each token.
     private void discardCharTokens(StringBuffer phrase, ArrayList<Token> tokenList) {
-        logDebug("discardCharTokens: '%s'", phrase);
+        LazyLog.logDebug("discardCharTokens: '%s'", phrase);
         int endPos = offsetAttr.endOffset();
         if (endPos == 0)
             endPos = lastEndPos;
@@ -428,7 +396,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
 
                     token.startPos = startPos + lastSp;
                     token.endPos = token.startPos + tok.length;
-                    logDebug("discard %s: %d, %d", tok, token.startPos, token.endPos);
+                    LazyLog.logDebug("discard %s: %d, %d", tok, token.startPos, token.endPos);
                     tokenList.add(token);
                 }
                 lastSp = i + 1;
