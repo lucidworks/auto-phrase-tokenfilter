@@ -58,6 +58,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
 
     private int positionIncrement = 0;
     private int lastEndPos = 0;
+    private int lastStartPos = 0;
 
     @SuppressWarnings("UnusedParameters")
     public AutoPhrasingTokenFilter(Version matchVersion, TokenStream input, CharArraySet phraseSet) {
@@ -139,11 +140,14 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
             return true;
         }
 
-        lastEndPos = offsetAttr.endOffset();
         char[] nextToken = nextToken();
+        saveOffsets();
         logDebug("nextToken: %s", nextToken);
 
         if (nextToken == null) {
+            // restore offsets
+            offsetAttr.setOffset(lastStartPos, lastEndPos);
+
             if (lastValid != null) {
                 logDebug("Emitting last valid token: %s", lastValid);
                 emit(lastValid);
@@ -283,6 +287,11 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
         }
     }
 
+    private void saveOffsets() {
+        if (offsetAttr.startOffset() > 0) lastStartPos = offsetAttr.startOffset();
+        if (offsetAttr.endOffset() > 0) lastEndPos = offsetAttr.endOffset();
+    }
+
     private char[] nextToken() throws IOException {
         if (input.incrementToken()) {
             if (charTermAttr != null) {
@@ -320,6 +329,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
         if (offsetAttr != null && offsetAttr.endOffset() >= token.length) {
             int start = offsetAttr.endOffset() - token.length;
             offsetAttr.setOffset(start, offsetAttr.endOffset());
+            saveOffsets();
         }
 
         positionIncrementAttr.setPositionIncrement(++positionIncrement);
@@ -331,6 +341,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
         emit(token.tok);
         if (token.endPos > token.startPos && token.startPos >= 0) {
             offsetAttr.setOffset(token.startPos, token.endPos);
+            saveOffsets();
         }
     }
 
