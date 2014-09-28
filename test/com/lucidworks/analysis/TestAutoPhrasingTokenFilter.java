@@ -12,8 +12,86 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
         return new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(phrases), false);
     }
 
-    public void testOneWord() throws Exception {
-        final CharArraySet phrases = getPhraseSets("income tax", "tax refund", "property tax");
+    public void testNoPhrasesNoReplaceNoInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets();
+        final String input = "";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {});
+    }
+
+    public void testNoPhrasesNoReplaceOneCharInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets();
+        final String input = "A";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"A"},
+                new int[] {0},
+                new int[] {1},
+                new int[] {1});
+    }
+
+    public void testNoPhrasesNoReplaceOneWordInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets();
+        final String input = "word";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"word"},
+                new int[] {0},
+                new int[] {4},
+                new int[] {1});
+    }
+
+    public void testNoPhrasesNoReplaceTwoCharsInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets();
+        final String input = "A B";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"A", "B"},
+                new int[] {0, 2},
+                new int[] {1, 3},
+                new int[] {1, 1});
+    }
+
+    public void testNoPhrasesNoReplaceTwoWordsInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets();
+        final String input = "two words";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"two", "words"},
+                new int[] {0, 4},
+                new int[] {3, 9},
+                new int[] {1, 1});
+    }
+
+    public void testNoPhrasesWithReplaceNoInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets();
+        final String input = "";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases, '_');
+        assertAnalyzesTo(analyzer, input,
+                new String[] {});
+    }
+
+    public void testNoPhrasesWithReplaceOneCharInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets();
+        final String input = "A";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases, '_');
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"A"},
+                new int[] {0},
+                new int[] {1},
+                new int[] {1});
+    }
+
+    public void testNoPhrasesWithReplaceOneWordInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets();
         final String input = "word";
 
         Analyzer analyzer = new AutoPhrasingAnalyzer(phrases, '_');
@@ -24,96 +102,201 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
                 new int[] {1});
     }
 
-    public void testAutoPhrase() throws Exception {
-        final CharArraySet phrases = getPhraseSets("income tax", "tax refund", "property tax");
-        final String input = "what is my income tax refund this year now that my property tax is so high";
+    public void testNoPhrasesWithReplaceTwoCharsInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets();
+        final String input = "A B";
 
         Analyzer analyzer = new AutoPhrasingAnalyzer(phrases, '_');
         assertAnalyzesTo(analyzer, input,
-                new String[] {"what", "is", "my", "income_tax", "tax_refund", "this", "year", "now", "that", "my",
-                        "property_tax", "is", "so", "high"},
-                new int[] {0, 5, 8, 11, 18, 29, 34, 39, 43, 48, 51, 64, 67, 70}, // this is wrong, so it goes
-                new int[] {4, 7, 10, 21, 28, 33, 38, 42, 47, 50, 63, 66, 69, 74});
+                new String[] {"A", "B"},
+                new int[] {0, 2},
+                new int[] {1, 3},
+                new int[] {1, 1});
     }
 
-    public void testOverlappingAtBeginning() throws Exception {
-        final CharArraySet phrases = getPhraseSets("new york", "new york city", "city of new york");
-        final String input = "new york city is great";
+    public void testNoPhrasesWithReplaceTwoWordsInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets();
+        final String input = "two words";
 
         Analyzer analyzer = new AutoPhrasingAnalyzer(phrases, '_');
         assertAnalyzesTo(analyzer, input,
-                new String[] {"new_york_city", "is", "great"});
+                new String[] {"two", "words"},
+                new int[] {0, 4},
+                new int[] {3, 9},
+                new int[] {1, 1});
     }
 
-    public void testOverlappingAtEnd() throws Exception {
-        final CharArraySet phrases = getPhraseSets("new york", "new york city", "city of new york");
-        final String input = "the great city of new york";
+    public void testOnePhraseNoReplaceNoInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair");
+        final String input = "";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {});
+    }
+
+    public void testOnePhraseNoReplaceOneCharInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair");
+        final String input = "A";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"A"},
+                new int[] {0},
+                new int[] {1},
+                new int[] {1});
+    }
+
+    public void testOnePhraseNoReplaceOneWordInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair");
+        final String input = "word";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"word"},
+                new int[] {0},
+                new int[] {4},
+                new int[] {1});
+    }
+
+    public void testOnePhraseNoReplaceTwoCharsInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair");
+        final String input = "A B";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"A", "B"},
+                new int[] {0, 2},
+                new int[] {1, 3},
+                new int[] {1, 1});
+    }
+
+    public void testOnePhraseNoReplaceTwoWordsInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair");
+        final String input = "two words";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"two", "words"},
+                new int[] {0, 4},
+                new int[] {3, 9},
+                new int[] {1, 1});
+    }
+
+    public void testOnePhraseWithReplaceNoInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair");
+        final String input = "";
 
         Analyzer analyzer = new AutoPhrasingAnalyzer(phrases, '_');
         assertAnalyzesTo(analyzer, input,
-                new String[]{"the", "great", "city_of_new_york"});
+                new String[] {});
     }
 
-    public void testIncompletePhrase() throws Exception {
-        final CharArraySet phrases = getPhraseSets("big apple", "new york city", "property tax", "three word phrase");
-        final String input = "some new york city";
+    public void testOnePhraseWithReplaceOneCharInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair");
+        final String input = "A";
 
         Analyzer analyzer = new AutoPhrasingAnalyzer(phrases, '_');
         assertAnalyzesTo(analyzer, input,
-                new String[]{"some", "new_york_city"});
+                new String[] {"A"},
+                new int[] {0},
+                new int[] {1},
+                new int[] {1});
     }
 
-    public void testPhrasesNullReplace() throws Exception {
-        final CharArraySet phrases = getPhraseSets("big apple", "new york city", "property tax", "three word phrase");
-        final String input = "some new york city something";
+    public void testOnePhraseWithReplaceOneWordInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair");
+        final String input = "word";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases, '_');
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"word"},
+                new int[] {0},
+                new int[] {4},
+                new int[] {1});
+    }
+
+    public void testOnePhraseWithReplaceTwoCharsInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair");
+        final String input = "A B";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases, '_');
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"A", "B"},
+                new int[] {0, 2},
+                new int[] {1, 3},
+                new int[] {1, 1});
+    }
+
+    public void testOnePhraseWithReplaceTwoWordsInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair");
+        final String input = "two words";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases, '_');
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"two", "words"},
+                new int[] {0, 4},
+                new int[] {3, 9},
+                new int[] {1, 1});
+    }
+
+    public void testOnePhraseNoReplacePartialPhraseInputStart() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair");
+        final String input = "wheel";
 
         Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
         assertAnalyzesTo(analyzer, input,
-                new String[]{"some", "newyorkcity", "something"});
+                new String[] {"wheel"},
+                new int[] {0},
+                new int[] {5},
+                new int[] {1});
     }
 
-    public void testPhrasesNullReplacePartialPhraseMatchIsOnlyToken() throws Exception {
-        final CharArraySet phrases = getPhraseSets("big apple", "new york city", "property tax", "three word phrase");
-        final String input = "big";
+    public void testOnePhraseNoReplacePartialPhraseInputEnd() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair");
+        final String input = "chair";
 
         Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
         assertAnalyzesTo(analyzer, input,
-                new String[]{"big"});
+                new String[] {"chair"},
+                new int[] {0},
+                new int[] {5},
+                new int[] {1});
     }
 
-    public void testPhrasesNullReplacePartialPhraseMatch() throws Exception {
-        final CharArraySet phrases = getPhraseSets("big apple", "new york city", "property tax", "three word phrase");
-        final String input = "big orange";
+    public void testOnePhraseNoReplacePhraseMatch() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair");
+        final String input = "wheel chair";
 
         Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
         assertAnalyzesTo(analyzer, input,
-                new String[]{"big", "orange"});
+                new String[] {"wheelchair"},
+                new int[] {0},
+                new int[] {10},
+                new int[] {1});
     }
 
-    public void testPhrasesNullReplacePartialPhraseMatchPartOnEnd() throws Exception {
-        final CharArraySet phrases = getPhraseSets("big apple", "new york city", "property tax", "three word phrase");
-        final String input = "orange big";
+    public void testOnePhraseWithReplacePartialPhraseInputStart() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair");
+        final String input = "wheel";
 
-        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases, '_');
         assertAnalyzesTo(analyzer, input,
-                new String[]{"orange", "big"});
+                new String[] {"wheel"},
+                new int[] {0},
+                new int[] {5},
+                new int[] {1});
     }
 
-    public void testPhrasesNullReplacePartialPhraseMatchPrecedingStuff() throws Exception {
-        final CharArraySet phrases = getPhraseSets("big apple", "new york city", "property tax", "three word phrase");
-        final String input = "something big orange";
+    public void testOnePhraseWithReplacePartialPhraseInputEnd() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair");
+        final String input = "chair";
 
-        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases, '_');
         assertAnalyzesTo(analyzer, input,
-                new String[]{"something", "big", "orange"});
-    }
-
-    public void testPhrasesNullReplacePartialPhraseMatchPartOnEndPrecedingStuff() throws Exception {
-        final CharArraySet phrases = getPhraseSets("big apple", "new york city", "property tax", "three word phrase");
-        final String input = "new york city something orange big";
-
-        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
-        assertAnalyzesTo(analyzer, input,
-                new String[]{"newyorkcity", "something", "orange", "big"});
+                new String[] {"chair"},
+                new int[] {0},
+                new int[] {5},
+                new int[] {1});
     }
 }

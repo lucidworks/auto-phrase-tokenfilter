@@ -1,5 +1,7 @@
 package com.lucidworks.analysis;
 
+import java.util.ArrayList;
+
 import static java.lang.System.arraycopy;
 
 /**
@@ -36,20 +38,7 @@ public class CharArrayUtil {
         return true;
     }
 
-    public static char[] replaceWhitespace(char[] phrase, Character replaceWhitespaceWith) {
-        if (replaceWhitespaceWith == null) return phrase;
-        char[] fixed = new char[phrase.length];
-        for (int i = 0; i < phrase.length; i++) {
-            if (phrase[i] == replaceWhitespaceWith) {
-                fixed[i] = ' ';
-            } else {
-                fixed[i] = phrase[i];
-            }
-        }
-        return fixed;
-    }
-
-    public static char[] replaceWhitespaceRemoveSpaceForNullReplaceWith(char[] token, Character replaceWhitespaceWith) {
+    public static char[] replaceWhitespace(char[] token, Character replaceWhitespaceWith) {
         char[] replaced = new char[token.length];
         int sourcePosition, destinationPosition;
         for (sourcePosition = 0, destinationPosition = 0; sourcePosition < token.length; sourcePosition++) {
