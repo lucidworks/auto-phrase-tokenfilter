@@ -299,4 +299,100 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
                 new int[] {5},
                 new int[] {1});
     }
+
+    public void testPhraseWithPrecedingNonPhraseWord() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair");
+        final String input = "some wheel chair";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"some", "wheelchair"},
+                new int[] {0, 5},
+                new int[] {4, 15},
+                new int[] {1, 1});
+    }
+
+    public void testPhraseWithFollowingNonPhraseWord() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair");
+        final String input = "wheel chair sauce";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"wheelchair", "sauce"},
+                new int[] {0, 11},
+                new int[] {10, 16},
+                new int[] {1, 1});
+    }
+
+    public void testTwoPhrases() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair", "foo bar");
+        final String input = "wheel chair foo bar";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"wheelchair", "foobar"},
+                new int[] {0, 11},
+                new int[] {10, 17},
+                new int[] {1, 1});
+    }
+
+    public void testTwoPhrasesSomethingInBetween() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair", "foo bar");
+        final String input = "wheel chair hello foo bar";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"wheelchair", "hello", "foobar"},
+                new int[] {0, 11, 17},
+                new int[] {10, 16, 23},
+                new int[] {1, 1, 1});
+    }
+
+    public void testTwoPhrasesTwoWordsInBetween() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair", "foo bar");
+        final String input = "wheel chair hello there foo bar";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"wheelchair", "hello", "there", "foobar"},
+                new int[] {0, 11, 17, 23},
+                new int[] {10, 16, 22, 29},
+                new int[] {1, 1, 1, 1});
+    }
+
+    public void testTwoPhrasesPrecedingWord() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair", "foo bar");
+        final String input = "hello wheel chair foo bar";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"hello", "wheelchair", "foobar"},
+                new int[] {0, 6, 17},
+                new int[] {5, 16, 23},
+                new int[] {1, 1, 1});
+    }
+
+    public void testTwoCompetingPhrases() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair", "chair alarm");
+        final String input = "wheel chair alarm";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"wheelchair", "alarm"},
+                new int[] {0, 11},
+                new int[] {10, 16},
+                new int[] {1, 1});
+    }
+
+    public void testTwoCompetingPhrasesBothPhrases() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair", "chair alarm");
+        final String input = "wheel chair chair alarm";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"wheelchair", "chairalarm"},
+                new int[] {0, 11},
+                new int[] {10, 21},
+                new int[] {1, 1});
+    }
 }
