@@ -123,7 +123,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
                 }
             }
             if (matches) {
-                LazyLog.logDebug("Found phrase match for '%s', removing those unused tokens and emitting it.");
+                LazyLog.logDebug("Found phrase match for '%s'.", potentialPhraseMatch);
                 for (String ignored : potentialPhraseWords)
                     unusedTokens.remove(0);
 
@@ -151,7 +151,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
     }
 
     private void emit(char[] token) {
-        LazyLog.logDebug("emit: %s", token);
+        LazyLog.logDebug("emit: '%s'", token);
 
         token = CharArrayUtil.replaceWhitespace(token, replaceWhitespaceWith);
 
