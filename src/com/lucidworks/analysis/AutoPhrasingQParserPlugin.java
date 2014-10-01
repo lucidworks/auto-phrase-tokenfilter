@@ -117,7 +117,7 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
             ts = new LowerCaseFilter(Version.LUCENE_48, wt);
         }
         AutoPhrasingTokenFilter autoPhrasingTokenFilter =
-                new AutoPhrasingTokenFilter(Version.LUCENE_48, ts, phraseSets, false);
+                new AutoPhrasingTokenFilter(Version.LUCENE_48, ts, phraseSets);
         autoPhrasingTokenFilter.setReplaceWhitespaceWith(autoPhrasingParameters.getReplaceWhitespaceWith());
         CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
         autoPhrasingTokenFilter.reset();

@@ -1,386 +1,398 @@
 package com.lucidworks.analysis;
 
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.BaseTokenStreamTestCase;
-import org.apache.lucene.analysis.core.WhitespaceTokenizer;
-import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.util.CharArraySet;
 
-import java.io.StringReader;
 import java.util.Arrays;
 
 public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
 
-    public void testAutoPhrase() throws Exception {
-        final CharArraySet phraseSets = new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(
-                "income tax", "tax refund", "property tax"
-        ), false);
-
-        final String input = "what is my income tax refund this year now that my property tax is so high";
-        WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
-        AutoPhrasingTokenFilter autoPhrasingTokenFilter =
-                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets, false);
-        autoPhrasingTokenFilter.setReplaceWhitespaceWith('_');
-        CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
-        autoPhrasingTokenFilter.reset();
-
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("what", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("is", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("my", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("income_tax", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("tax_refund", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("this", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("year", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("now", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("that", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("my", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("property_tax", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("is", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("so", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("high", term.toString());
-
-        assertFalse(autoPhrasingTokenFilter.incrementToken());
+    private static CharArraySet getPhraseSets(String... phrases) {
+        return new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(phrases), false);
     }
 
-    public void testAutoPhraseEmitSingle() throws Exception {
-        final CharArraySet phraseSets = new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(
-                "income tax", "tax refund", "property tax"
-        ), false);
+    public void testNoPhrasesNoReplaceNoInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets();
+        final String input = "";
 
-        final String input = "what is my income tax refund this year now that my property tax is so high";
-        WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
-        AutoPhrasingTokenFilter autoPhrasingTokenFilter =
-                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets, true);
-        autoPhrasingTokenFilter.setReplaceWhitespaceWith('_');
-        CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
-        autoPhrasingTokenFilter.reset();
-
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("what", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("is", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("my", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("income", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("income_tax", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("tax", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("tax_refund", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("refund", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("this", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("year", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("now", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("that", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("my", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("property", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("property_tax", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("tax", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("is", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("so", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("high", term.toString());
-
-        assertFalse(autoPhrasingTokenFilter.incrementToken());
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {});
     }
 
-    public void testOverlappingAtBeginning() throws Exception {
-        final CharArraySet phraseSets = new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(
-                "new york", "new york city", "city of new york"
-        ), false);
+    public void testNoPhrasesNoReplaceOneCharInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets();
+        final String input = "A";
 
-        final String input = "new york city is great";
-        WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
-        AutoPhrasingTokenFilter autoPhrasingTokenFilter =
-                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets, false);
-        autoPhrasingTokenFilter.setReplaceWhitespaceWith('_');
-        CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
-        autoPhrasingTokenFilter.reset();
-
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("new_york_city", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("is", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("great", term.toString());
-
-        assertFalse(autoPhrasingTokenFilter.incrementToken());
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"A"},
+                new int[] {0},
+                new int[] {1},
+                new int[] {1});
     }
 
-    public void testOverlappingAtBeginningEmitSingle() throws Exception {
-        final CharArraySet phraseSets = new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(
-                "new york", "new york city", "city of new york"
-        ), false);
+    public void testNoPhrasesNoReplaceOneWordInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets();
+        final String input = "word";
 
-
-        final String input = "new york city is great";
-        WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
-        AutoPhrasingTokenFilter autoPhrasingTokenFilter =
-                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets, true);
-        autoPhrasingTokenFilter.setReplaceWhitespaceWith('_');
-        CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
-        autoPhrasingTokenFilter.reset();
-
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("new", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("york", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("new_york", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("new_york_city", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("city", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("is", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("great", term.toString());
-
-        assertFalse(autoPhrasingTokenFilter.incrementToken());
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"word"},
+                new int[] {0},
+                new int[] {4},
+                new int[] {1});
     }
 
-    public void testOverlappingAtEndEmitSingle() throws Exception {
-        final CharArraySet phraseSets = new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(
-                "new york", "new york city", "city of new york"
-        ), false);
+    public void testNoPhrasesNoReplaceTwoCharsInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets();
+        final String input = "A B";
 
-        final String input = "the great city of new york";
-
-        WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
-        AutoPhrasingTokenFilter autoPhrasingTokenFilter =
-                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets, true);
-        autoPhrasingTokenFilter.setReplaceWhitespaceWith('_');
-        CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
-        autoPhrasingTokenFilter.reset();
-
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("the", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("great", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("city", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("of", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("new", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("york", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("city_of_new_york", term.toString());
-        //bug here cause by fixing the endsWith method of CharArrayUtil, implementation conflicts with itself
-        //assertTrue(autoPhrasingTokenFilter.incrementToken());
-        //assertEquals("new_york", term.toString());
-
-        assertFalse(autoPhrasingTokenFilter.incrementToken());
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"A", "B"},
+                new int[] {0, 2},
+                new int[] {1, 3},
+                new int[] {1, 1});
     }
 
-    public void testOverlappingAtEnd() throws Exception {
-        final CharArraySet phraseSets = new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(
-                "new york", "new york city", "city of new york"
-        ), false);
+    public void testNoPhrasesNoReplaceTwoWordsInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets();
+        final String input = "two words";
 
-        final String input = "the great city of new york";
-
-        WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
-        AutoPhrasingTokenFilter autoPhrasingTokenFilter =
-                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets, false);
-        autoPhrasingTokenFilter.setReplaceWhitespaceWith('_');
-        CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
-        autoPhrasingTokenFilter.reset();
-
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("the", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("great", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("city_of_new_york", term.toString());
-
-        assertFalse(autoPhrasingTokenFilter.incrementToken());
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"two", "words"},
+                new int[] {0, 4},
+                new int[] {3, 9},
+                new int[] {1, 1});
     }
 
-    public void testIncompletePhrase() throws Exception {
-        final CharArraySet phraseSets = new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(
-                "big apple", "new york city", "property tax", "three word phrase"
-        ), false);
+    public void testNoPhrasesWithReplaceNoInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets();
+        final String input = "";
 
-        final String input = "some new york city";
-
-        WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
-        AutoPhrasingTokenFilter autoPhrasingTokenFilter =
-                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets, false);
-        autoPhrasingTokenFilter.setReplaceWhitespaceWith('_');
-        CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
-        autoPhrasingTokenFilter.reset();
-
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("some", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("new_york_city", term.toString());
-
-        assertFalse(autoPhrasingTokenFilter.incrementToken());
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases, '_');
+        assertAnalyzesTo(analyzer, input,
+                new String[] {});
     }
 
-    public void testPhrasesNullReplace() throws Exception {
-        final CharArraySet phraseSets = new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(
-                "big apple", "new york city", "property tax", "three word phrase"
-        ), false);
+    public void testNoPhrasesWithReplaceOneCharInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets();
+        final String input = "A";
 
-        final String input = "some new york city something";
-
-        WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
-        AutoPhrasingTokenFilter autoPhrasingTokenFilter =
-                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets, false);
-        autoPhrasingTokenFilter.setReplaceWhitespaceWith(null);
-        CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
-        autoPhrasingTokenFilter.reset();
-
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("some", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("newyorkcity", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("something", term.toString());
-
-        assertFalse(autoPhrasingTokenFilter.incrementToken());
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases, '_');
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"A"},
+                new int[] {0},
+                new int[] {1},
+                new int[] {1});
     }
 
-    public void testPhrasesNullReplacePartialPhraseMatchIsOnlyToken() throws Exception {
-        final CharArraySet phraseSets = new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(
-                "big apple", "new york city", "property tax", "three word phrase"
-        ), false);
+    public void testNoPhrasesWithReplaceOneWordInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets();
+        final String input = "word";
 
-        final String input = "big";
-
-        WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
-        AutoPhrasingTokenFilter autoPhrasingTokenFilter =
-                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets, false);
-        autoPhrasingTokenFilter.setReplaceWhitespaceWith(null);
-        CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
-        autoPhrasingTokenFilter.reset();
-
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("big", term.toString());
-
-        assertFalse(autoPhrasingTokenFilter.incrementToken());
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases, '_');
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"word"},
+                new int[] {0},
+                new int[] {4},
+                new int[] {1});
     }
 
-    public void testPhrasesNullReplacePartialPhraseMatch() throws Exception {
-        final CharArraySet phraseSets = new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(
-                "big apple", "new york city", "property tax", "three word phrase"
-        ), false);
+    public void testNoPhrasesWithReplaceTwoCharsInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets();
+        final String input = "A B";
 
-        final String input = "big orange";
-
-        WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
-        AutoPhrasingTokenFilter autoPhrasingTokenFilter =
-                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets, false);
-        autoPhrasingTokenFilter.setReplaceWhitespaceWith(null);
-        CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
-        autoPhrasingTokenFilter.reset();
-
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("big", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("orange", term.toString());
-
-        assertFalse(autoPhrasingTokenFilter.incrementToken());
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases, '_');
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"A", "B"},
+                new int[] {0, 2},
+                new int[] {1, 3},
+                new int[] {1, 1});
     }
 
-    public void testPhrasesNullReplacePartialPhraseMatchPartOnEnd() throws Exception {
-        final CharArraySet phraseSets = new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(
-                "big apple", "new york city", "property tax", "three word phrase"
-        ), false);
+    public void testNoPhrasesWithReplaceTwoWordsInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets();
+        final String input = "two words";
 
-        final String input = "orange big";
-
-        WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
-        AutoPhrasingTokenFilter autoPhrasingTokenFilter =
-                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets, false);
-        autoPhrasingTokenFilter.setReplaceWhitespaceWith(null);
-        CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
-        autoPhrasingTokenFilter.reset();
-
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("orange", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("big", term.toString());
-
-        assertFalse(autoPhrasingTokenFilter.incrementToken());
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases, '_');
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"two", "words"},
+                new int[] {0, 4},
+                new int[] {3, 9},
+                new int[] {1, 1});
     }
 
-    public void testPhrasesNullReplacePartialPhraseMatchPrecedingStuff() throws Exception {
-        final CharArraySet phraseSets = new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(
-                "big apple", "new york city", "property tax", "three word phrase"
-        ), false);
+    public void testOnePhraseNoReplaceNoInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair");
+        final String input = "";
 
-        final String input = "something big orange";
-
-        WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
-        AutoPhrasingTokenFilter autoPhrasingTokenFilter =
-                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets, false);
-        autoPhrasingTokenFilter.setReplaceWhitespaceWith(null);
-        CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
-        autoPhrasingTokenFilter.reset();
-
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("something", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("big", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("orange", term.toString());
-
-        assertFalse(autoPhrasingTokenFilter.incrementToken());
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {});
     }
 
-    public void testPhrasesNullReplacePartialPhraseMatchPartOnEndPrecedingStuff() throws Exception {
-        final CharArraySet phraseSets = new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(
-                "big apple", "new york city", "property tax", "three word phrase"
-        ), false);
+    public void testOnePhraseNoReplaceOneCharInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair");
+        final String input = "A";
 
-        final String input = "new york city something orange big";
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"A"},
+                new int[] {0},
+                new int[] {1},
+                new int[] {1});
+    }
 
-        WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
-        AutoPhrasingTokenFilter autoPhrasingTokenFilter =
-                new AutoPhrasingTokenFilter(TEST_VERSION_CURRENT, wt, phraseSets, false);
-        autoPhrasingTokenFilter.setReplaceWhitespaceWith(null);
-        CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
-        autoPhrasingTokenFilter.reset();
+    public void testOnePhraseNoReplaceOneWordInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair");
+        final String input = "word";
 
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("newyorkcity", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("something", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("orange", term.toString());
-        assertTrue(autoPhrasingTokenFilter.incrementToken());
-        assertEquals("big", term.toString());
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"word"},
+                new int[] {0},
+                new int[] {4},
+                new int[] {1});
+    }
 
-        assertFalse(autoPhrasingTokenFilter.incrementToken());
+    public void testOnePhraseNoReplaceTwoCharsInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair");
+        final String input = "A B";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"A", "B"},
+                new int[] {0, 2},
+                new int[] {1, 3},
+                new int[] {1, 1});
+    }
+
+    public void testOnePhraseNoReplaceTwoWordsInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair");
+        final String input = "two words";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"two", "words"},
+                new int[] {0, 4},
+                new int[] {3, 9},
+                new int[] {1, 1});
+    }
+
+    public void testOnePhraseWithReplaceNoInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair");
+        final String input = "";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases, '_');
+        assertAnalyzesTo(analyzer, input,
+                new String[] {});
+    }
+
+    public void testOnePhraseWithReplaceOneCharInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair");
+        final String input = "A";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases, '_');
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"A"},
+                new int[] {0},
+                new int[] {1},
+                new int[] {1});
+    }
+
+    public void testOnePhraseWithReplaceOneWordInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair");
+        final String input = "word";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases, '_');
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"word"},
+                new int[] {0},
+                new int[] {4},
+                new int[] {1});
+    }
+
+    public void testOnePhraseWithReplaceTwoCharsInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair");
+        final String input = "A B";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases, '_');
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"A", "B"},
+                new int[] {0, 2},
+                new int[] {1, 3},
+                new int[] {1, 1});
+    }
+
+    public void testOnePhraseWithReplaceTwoWordsInput() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair");
+        final String input = "two words";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases, '_');
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"two", "words"},
+                new int[] {0, 4},
+                new int[] {3, 9},
+                new int[] {1, 1});
+    }
+
+    public void testOnePhraseNoReplacePartialPhraseInputStart() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair");
+        final String input = "wheel";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"wheel"},
+                new int[] {0},
+                new int[] {5},
+                new int[] {1});
+    }
+
+    public void testOnePhraseNoReplacePartialPhraseInputEnd() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair");
+        final String input = "chair";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"chair"},
+                new int[] {0},
+                new int[] {5},
+                new int[] {1});
+    }
+
+    public void testOnePhraseNoReplacePhraseMatch() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair");
+        final String input = "wheel chair";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"wheelchair"},
+                new int[] {0},
+                new int[] {10},
+                new int[] {1});
+    }
+
+    public void testOnePhraseWithReplacePartialPhraseInputStart() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair");
+        final String input = "wheel";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases, '_');
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"wheel"},
+                new int[] {0},
+                new int[] {5},
+                new int[] {1});
+    }
+
+    public void testOnePhraseWithReplacePartialPhraseInputEnd() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair");
+        final String input = "chair";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases, '_');
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"chair"},
+                new int[] {0},
+                new int[] {5},
+                new int[] {1});
+    }
+
+    public void testPhraseWithPrecedingNonPhraseWord() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair");
+        final String input = "some wheel chair";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"some", "wheelchair"},
+                new int[] {0, 5},
+                new int[] {4, 15},
+                new int[] {1, 1});
+    }
+
+    public void testPhraseWithFollowingNonPhraseWord() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair");
+        final String input = "wheel chair sauce";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"wheelchair", "sauce"},
+                new int[] {0, 11},
+                new int[] {10, 16},
+                new int[] {1, 1});
+    }
+
+    public void testTwoPhrases() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair", "foo bar");
+        final String input = "wheel chair foo bar";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"wheelchair", "foobar"},
+                new int[] {0, 11},
+                new int[] {10, 17},
+                new int[] {1, 1});
+    }
+
+    public void testTwoPhrasesSomethingInBetween() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair", "foo bar");
+        final String input = "wheel chair hello foo bar";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"wheelchair", "hello", "foobar"},
+                new int[] {0, 11, 17},
+                new int[] {10, 16, 23},
+                new int[] {1, 1, 1});
+    }
+
+    public void testTwoPhrasesTwoWordsInBetween() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair", "foo bar");
+        final String input = "wheel chair hello there foo bar";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"wheelchair", "hello", "there", "foobar"},
+                new int[] {0, 11, 17, 23},
+                new int[] {10, 16, 22, 29},
+                new int[] {1, 1, 1, 1});
+    }
+
+    public void testTwoPhrasesPrecedingWord() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair", "foo bar");
+        final String input = "hello wheel chair foo bar";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"hello", "wheelchair", "foobar"},
+                new int[] {0, 6, 17},
+                new int[] {5, 16, 23},
+                new int[] {1, 1, 1});
+    }
+
+    public void testTwoCompetingPhrases() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair", "chair alarm");
+        final String input = "wheel chair alarm";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"wheelchair", "alarm"},
+                new int[] {0, 11},
+                new int[] {10, 16},
+                new int[] {1, 1});
+    }
+
+    public void testTwoCompetingPhrasesBothPhrases() throws Exception {
+        final CharArraySet phrases = getPhraseSets("wheel chair", "chair alarm");
+        final String input = "wheel chair chair alarm";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"wheelchair", "chairalarm"},
+                new int[] {0, 11},
+                new int[] {10, 21},
+                new int[] {1, 1});
     }
 }
