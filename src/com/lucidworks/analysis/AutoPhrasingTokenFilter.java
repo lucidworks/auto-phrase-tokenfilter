@@ -32,20 +32,22 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
     private OffsetAttribute offsetAttr;
 
     private Character replaceWhitespaceWith = null;
-
-    private final int EstimatedPhraseMapEntries = 100;
+    private Version luceneMatchVersion;
 
     // maps the first word in each auto phrase to all phrases that start with that word
-    private CharArrayMap<CharArraySet> phraseMapFirstWordToPhrases =
-            new CharArrayMap<CharArraySet>(Version.LUCENE_48, EstimatedPhraseMapEntries, false);
+    private CharArrayMap<CharArraySet> phraseMapFirstWordToPhrases;
 
     private ArrayList<char[]> unusedTokens = new ArrayList<char[]>();
     private int offsetStartPos = 0;
     private int offsetEndPos = 0;
 
-    @SuppressWarnings("UnusedParameters")
     public AutoPhrasingTokenFilter(Version matchVersion, TokenStream input, CharArraySet phraseSet) {
         super(input);
+
+        this.luceneMatchVersion = matchVersion;
+        final int estimatedPhraseMapEntries = 100;
+        phraseMapFirstWordToPhrases =
+                new CharArrayMap<CharArraySet>(luceneMatchVersion, estimatedPhraseMapEntries, false);
 
         initializePhraseMap(phraseSet);
         initializeAttributes();
@@ -59,7 +61,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
             char[] firstWord = CharArrayUtil.getFirstTerm(phrase);
             CharArraySet phrases = phraseMapFirstWordToPhrases.get(firstWord, 0, firstWord.length);
             if (phrases == null){
-                phrases = new CharArraySet(Version.LUCENE_48, EstimatedPhrasesPerFirstWord, false);
+                phrases = new CharArraySet(luceneMatchVersion, EstimatedPhrasesPerFirstWord, false);
                 phraseMapFirstWordToPhrases.put(firstWord, phrases);
             }
             phrases.add(phrase);
