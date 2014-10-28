@@ -237,6 +237,10 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
         invokeCreateParser(actual, expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
     }
 
+    public void testCreateParserNullQuery() throws Exception {
+        invokeCreateParser(null, null, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+    }
+
     private void invokeCreateParser(String query, String expectedModifiedQuery) throws IOException {
         invokeCreateParser(query, expectedModifiedQuery, DefaultIgnoreCase, DefaultReplaceWhitespaceWith);
     }

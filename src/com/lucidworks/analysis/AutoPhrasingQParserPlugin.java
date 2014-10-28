@@ -44,9 +44,12 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
                                 SolrQueryRequest req) {
         Log.debug("createParser AutoPhrasingQParserPlugin...");
         ModifiableSolrParams modifiableSolrParams = new ModifiableSolrParams(params);
-        String modQ = filter(qStr);
 
-        modifiableSolrParams.set("q", modQ);
+        String modQ = qStr;
+        if (qStr != null) {
+            modQ = filter(qStr);
+            modifiableSolrParams.set("q", modQ);
+        }
         return req.getCore().getQueryPlugin(autoPhrasingParameters.getDownstreamParser())
                 .createParser(modQ, localParams, modifiableSolrParams, req);
     }
