@@ -395,4 +395,16 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
                 new int[] {10, 21},
                 new int[] {1, 1});
     }
+
+    public void testMultiplePhraseMatchUsesLongest() throws Exception {
+        final CharArraySet phrases = getPhraseSets("corn bread", "corn bread dressing");
+        final String input = "corn bread dressing";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"cornbreaddressing"},
+                new int[] {0},
+                new int[] {17},
+                new int[] {1});
+    }
 }

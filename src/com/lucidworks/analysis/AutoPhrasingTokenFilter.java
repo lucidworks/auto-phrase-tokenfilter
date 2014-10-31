@@ -110,6 +110,8 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
 
         //foreach potential phrase match look ahead in the queue and find the first match
         //remove those, make a phrase and emit it
+        char[] phraseMatch = null;
+        String[] phraseWords = null;
         for (Object aPotentialPhraseMatch : potentialPhraseMatches) {
             char[] potentialPhraseMatch = (char[])aPotentialPhraseMatch;
             String[] potentialPhraseWords = new String(potentialPhraseMatch).split(" ");
@@ -124,14 +126,22 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
                     break;
                 }
             }
-            if (matches) {
-                LazyLog.logDebug("Found phrase match for '%s'.", potentialPhraseMatch);
-                for (String ignored : potentialPhraseWords)
-                    unusedTokens.remove(0);
-
-                emit(potentialPhraseMatch);
-                return true;
+            if (matches && (phraseMatch == null || potentialPhraseMatch.length > phraseMatch.length)) {
+                LazyLog.logDebug("Found potential longest phrase match for '%s'.", potentialPhraseMatch);
+                phraseMatch = new char[potentialPhraseMatch.length];
+                arraycopy(potentialPhraseMatch, 0, phraseMatch, 0, potentialPhraseMatch.length);
+                phraseWords = new String[potentialPhraseWords.length];
+                arraycopy(potentialPhraseWords, 0, phraseWords, 0, potentialPhraseWords.length);
             }
+        }
+        if (phraseMatch != null) {
+            LazyLog.logDebug("Found phrase match for '%s'.", phraseMatch);
+            for (String ignored : phraseWords) {
+                unusedTokens.remove(0);
+            }
+
+            emit(phraseMatch);
+            return true;
         }
 
         LazyLog.logDebug("No phrase matches found, emitting single token.");
