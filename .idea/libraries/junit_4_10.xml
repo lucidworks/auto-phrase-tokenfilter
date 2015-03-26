@@ -1,0 +1,20 @@
+<component name="libraryTable">
+  <library name="junit-4.10">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/junit-4.10.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/junit4-ant-2.1.3.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/log4j-1.2.16.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/lucene-analyzers-common-4.8-SNAPSHOT.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/lucene-codecs-4.8-SNAPSHOT.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/lucene-core-4.8-SNAPSHOT.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/lucene-test-framework-4.8-SNAPSHOT.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/randomizedtesting-runner-2.1.3.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/slf4j-api-1.7.6.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/slf4j-log4j12-1.7.6.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/solr-core-4.8-SNAPSHOT.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/solr-solrj-4.8-SNAPSHOT.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
