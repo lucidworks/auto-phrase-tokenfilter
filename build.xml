@@ -39,7 +39,7 @@
 
   <target name="compile" depends="init,ivy-retrieve,set-classpaths" description="compile the source " >
     <!-- Compile the java code from ${src} into ${build} -->
-    <javac srcdir="${src.dir}" destdir="${classes.dir}" >
+    <javac srcdir="${src.dir}" destdir="${classes.dir}" includeantruntime="false" >
       <classpath>
         <fileset dir="${ivy.lib.dir}" includes="compile/*.jar" />
       </classpath>
@@ -47,7 +47,7 @@
   </target>
   
   <target  name="compile-test" depends="compile" >
-    <javac srcdir="${test.dir}" destdir="${test.classes.dir}" >
+    <javac srcdir="${test.dir}" destdir="${test.classes.dir}" includeantruntime="false" >
       <classpath>
         <fileset dir="${ivy.lib.dir}" includes="test/*.jar" />
         <pathelement location="${classes.dir}" />
