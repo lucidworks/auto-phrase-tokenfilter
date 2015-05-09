@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.apache.lucene.util.AttributeImpl;
-import org.apache.lucene.util.Version;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
@@ -415,7 +414,7 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
   
 	
   private CharArrayMap convertPhraseSet( CharArraySet phraseSet ) {
-	CharArrayMap<CharArraySet> phraseMap = new CharArrayMap( Version.LATEST, 100, false);
+	CharArrayMap<CharArraySet> phraseMap = new CharArrayMap( 100, false);
 	Iterator<Object> phraseIt = phraseSet.iterator( ); 
 	while (phraseIt != null && phraseIt.hasNext() ) {
 	  char[] phrase = (char[])phraseIt.next();
@@ -427,7 +426,7 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
 			
 	  CharArraySet itsPhrases = phraseMap.get( firstTerm, 0, firstTerm.length );
 	  if (itsPhrases == null) {
-	    itsPhrases = new CharArraySet( Version.LATEST, 5, false );
+	    itsPhrases = new CharArraySet( 5, false );
 		phraseMap.put( new String( firstTerm ), itsPhrases );
       }
 			
@@ -492,41 +491,41 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
   }
   
   private CharArraySet remove( CharArraySet fromSet, char[] charArray ) {
-	  // System.out.println( "remove from: " + new String( charArray ));
-	  CharArraySet newSet = new CharArraySet( Version.LUCENE_46, 5, false );
-	  Iterator<Object> phraseIt = currentSetToCheck.iterator();
-      while (phraseIt != null && phraseIt.hasNext() ) {
-        char[] phrase = (char[])phraseIt.next();
+    Log.debug( "remove from: " + new String( charArray ));
+    CharArraySet newSet = new CharArraySet( 5, false );
+    Iterator<Object> phraseIt = currentSetToCheck.iterator();
+    while (phraseIt != null && phraseIt.hasNext() ) {
+      char[] phrase = (char[])phraseIt.next();
         		
-        // if (!equals( phrase, charArray) && (startsWith( charArray, phrase ) || endsWith( charArray, phrase))) {
-        if (!equals( phrase, charArray) && startsWith( phrase, charArray) || endsWith( charArray, phrase)) {
-          newSet.add( phrase );
-        }
-        else {
-          // System.out.println( "removing " + new String( phrase ));
-        }
+      // if (!equals( phrase, charArray) && (startsWith( charArray, phrase ) || endsWith( charArray, phrase))) {
+      if (!equals( phrase, charArray) && startsWith( phrase, charArray) || endsWith( charArray, phrase)) {
+        newSet.add( phrase );
       }
+      else {
+        Log.debug( "removing " + new String( phrase ));
+      }
+    }
       
-	  return newSet;
+    return newSet;
   }
   
   private char[] fixWhitespace( char[] phrase ) {
     if (replaceWhitespaceWith == null) return phrase;
 	char[] fixed = new char[ phrase.length ];
-	  for (int i = 0; i < phrase.length; i++) {
-		  if (phrase[i] == replaceWhitespaceWith.charValue()) {
-			  fixed[i] = ' ';
-		  }
-		  else {
-			  fixed[i] = phrase[i];
-		  }
-	  }
-	  return fixed;
+    for (int i = 0; i < phrase.length; i++) {
+      if (phrase[i] == replaceWhitespaceWith.charValue()) {
+        fixed[i] = ' ';
+      }
+      else {
+        fixed[i] = phrase[i];
+      }
+    }
+    return fixed;
   }
   
   class Token {
-	  char[] tok;
-	  int startPos;
-	  int endPos;
+    char[] tok;
+    int startPos;
+    int endPos;
   }
 }
