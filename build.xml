@@ -72,7 +72,8 @@
 
   <target name="test" depends="compile,compile-test">
     <echo message=""/>
-    <junit printsummary="yes" fork="yes" showoutput="yes">
+    <junit printsummary="yes" fork="yes" haltonfailure="yes">
+      <formatter usefile="false" type="plain"/>
       <classpath>
         <path refid="test-classpath"/>
         <pathelement location="${classes.dir}"/>

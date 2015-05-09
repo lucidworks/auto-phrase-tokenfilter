@@ -57,7 +57,7 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
   
   private int positionIncr = 0;
 	
-  public AutoPhrasingTokenFilter( Version matchVersion, TokenStream input, CharArraySet phraseSet, boolean emitSingleTokens ) {
+  public AutoPhrasingTokenFilter( TokenStream input, CharArraySet phraseSet, boolean emitSingleTokens ) {
     super(input);
     	
     // Convert to CharArrayMap by iterating the char[] strings and
@@ -88,7 +88,7 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
   }
   
   @Override
-  public boolean incrementToken() throws IOException {
+  public final boolean incrementToken() throws IOException {
     if (!emitSingleTokens && unusedTokens.size() > 0) {
       Log.debug( "emitting unused phrases" );
       // emit these until the queue is empty before emitting any new stuff
@@ -415,7 +415,7 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
   
 	
   private CharArrayMap convertPhraseSet( CharArraySet phraseSet ) {
-	CharArrayMap<CharArraySet> phraseMap = new CharArrayMap( Version.LUCENE_46, 100, false);
+	CharArrayMap<CharArraySet> phraseMap = new CharArrayMap( Version.LATEST, 100, false);
 	Iterator<Object> phraseIt = phraseSet.iterator( ); 
 	while (phraseIt != null && phraseIt.hasNext() ) {
 	  char[] phrase = (char[])phraseIt.next();
@@ -427,7 +427,7 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
 			
 	  CharArraySet itsPhrases = phraseMap.get( firstTerm, 0, firstTerm.length );
 	  if (itsPhrases == null) {
-	    itsPhrases = new CharArraySet( Version.LUCENE_46, 5, false );
+	    itsPhrases = new CharArraySet( Version.LATEST, 5, false );
 		phraseMap.put( new String( firstTerm ), itsPhrases );
       }
 			

@@ -111,12 +111,12 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
   }
 	
   private String autophrase( String input ) throws IOException {
-    WhitespaceTokenizer wt = new WhitespaceTokenizer(Version.LUCENE_46, new StringReader( input ));
+    WhitespaceTokenizer wt = new WhitespaceTokenizer(Version.LATEST, new StringReader( input ));
     TokenStream ts = wt;
     if (ignoreCase) {
       ts = new LowerCaseFilter(Version.LUCENE_46, wt );
     }
-    AutoPhrasingTokenFilter aptf = new AutoPhrasingTokenFilter( Version.LUCENE_46, ts, phraseSets, false );
+    AutoPhrasingTokenFilter aptf = new AutoPhrasingTokenFilter( ts, phraseSets, false );
     aptf.setReplaceWhitespaceWith( new Character( replaceWhitespaceWith ) );
     CharTermAttribute term = aptf.addAttribute(CharTermAttribute.class);
     aptf.reset();

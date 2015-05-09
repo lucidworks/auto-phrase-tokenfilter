@@ -1,29 +1,29 @@
 package com.lucidworks.analysis;
 
-import java.util.Arrays;
 import java.io.StringReader;
+import java.util.Arrays;
 
+import junit.framework.TestCase;
 import org.apache.lucene.analysis.core.WhitespaceTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.analysis.BaseTokenStreamTestCase;
 import org.apache.lucene.analysis.util.CharArraySet;
 
-public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
-
+public class TestAutoPhrasingTokenFilter extends TestCase {
+    
   public void testAutoPhrase( ) throws Exception {
-    final CharArraySet phraseSets = new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(
-            "income tax", "tax refund", "property tax"
-  	      ), false);
-   	 
+    final CharArraySet phraseSets = new CharArraySet( Arrays.asList(
+            "income tax", "tax refund", "property tax" ), false);
+    
     final String input = "what is my income tax refund this year now that my property tax is so high";
-    WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
-    AutoPhrasingTokenFilter aptf = new AutoPhrasingTokenFilter( TEST_VERSION_CURRENT, wt, phraseSets, false );
+        
+
+    StringReader reader = new StringReader(input);
+    final WhitespaceTokenizer in = new WhitespaceTokenizer( reader );
+    AutoPhrasingTokenFilter aptf = new AutoPhrasingTokenFilter( in, phraseSets, false );
     aptf.setReplaceWhitespaceWith( new Character( '_' ) );
     CharTermAttribute term = aptf.addAttribute(CharTermAttribute.class);
     aptf.reset();
 
-    // printTokens( aptf, term );
-    
     assertTrue(aptf.incrementToken());
     assertEquals( "what", term.toString());
     assertTrue(aptf.incrementToken());
@@ -55,18 +55,18 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
   }
     
   public void testAutoPhraseEmitSingle( ) throws Exception {
-    final CharArraySet phraseSets = new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(
-            "income tax", "tax refund", "property tax"
-   	     ), false);
-    	 
+    final CharArraySet phraseSets = new CharArraySet( Arrays.asList(
+        "income tax", "tax refund", "property tax" ), false);
+        
     final String input = "what is my income tax refund this year now that my property tax is so high";
-    WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
-    AutoPhrasingTokenFilter aptf = new AutoPhrasingTokenFilter( TEST_VERSION_CURRENT, wt, phraseSets, true );
+      
+    StringReader reader = new StringReader(input);
+    final WhitespaceTokenizer in = new WhitespaceTokenizer( reader );
+        
+    AutoPhrasingTokenFilter aptf = new AutoPhrasingTokenFilter( in, phraseSets, true );
     aptf.setReplaceWhitespaceWith( new Character( '_' ) );
-    CharTermAttribute term = aptf.addAttribute(CharTermAttribute.class);
+    CharTermAttribute term = aptf.addAttribute( CharTermAttribute.class );
     aptf.reset();
-
-    // printTokens( aptf, term );
         
     assertTrue(aptf.incrementToken());
     assertEquals( "what", term.toString());
@@ -109,19 +109,19 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
   }
     
   public void testOverlappingAtBeginning( ) throws Exception {
-    final CharArraySet phraseSets = new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(
-                "new york", "new york city", "city of new york"
-          ), false);
-      	 
+    final CharArraySet phraseSets = new CharArraySet( Arrays.asList(
+            "new york", "new york city", "city of new york" ), false);
+        
     final String input = "new york city is great";
-    WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
-    AutoPhrasingTokenFilter aptf = new AutoPhrasingTokenFilter( TEST_VERSION_CURRENT, wt, phraseSets, false );
+        
+    StringReader reader = new StringReader(input);
+    final WhitespaceTokenizer in = new WhitespaceTokenizer( reader );
+        
+    AutoPhrasingTokenFilter aptf = new AutoPhrasingTokenFilter( in, phraseSets, false );
     aptf.setReplaceWhitespaceWith( new Character( '_' ) );
     CharTermAttribute term = aptf.addAttribute(CharTermAttribute.class);
     aptf.reset();
-
-    // printTokens( aptf, term );
-          
+        
     assertTrue(aptf.incrementToken());
     assertEquals( "new_york_city", term.toString());
     assertTrue(aptf.incrementToken());
@@ -131,20 +131,19 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
   }
     
   public void testOverlappingAtBeginningEmitSingle( ) throws Exception {
-    final CharArraySet phraseSets = new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(
-          "new york", "new york city", "city of new york"
-  	     ), false);
-   	 
-
+    final CharArraySet phraseSets = new CharArraySet( Arrays.asList(
+            "new york", "new york city", "city of new york" ), false);
+        
     final String input = "new york city is great";
-    WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
-    AutoPhrasingTokenFilter aptf = new AutoPhrasingTokenFilter( TEST_VERSION_CURRENT, wt, phraseSets, true );
+        
+    StringReader reader = new StringReader(input);
+    final WhitespaceTokenizer in = new WhitespaceTokenizer( reader );
+      
+    AutoPhrasingTokenFilter aptf = new AutoPhrasingTokenFilter( in, phraseSets, true );
     aptf.setReplaceWhitespaceWith( new Character( '_' ) );
     CharTermAttribute term = aptf.addAttribute(CharTermAttribute.class);
     aptf.reset();
-
-    // printTokens( aptf, term );
-       
+        
     assertTrue(aptf.incrementToken());
     assertEquals( "new", term.toString());
     assertTrue(aptf.incrementToken());
@@ -162,20 +161,19 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
   }
     
   public void testOverlappingAtEndEmitSingle( ) throws Exception {
-    final CharArraySet phraseSets = new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(
-            "new york", "new york city", "city of new york"
-            ), false);
-     	 
+    final CharArraySet phraseSets = new CharArraySet( Arrays.asList(
+        "new york", "new york city", "city of new york" ), false);
+        
     final String input = "the great city of new york";
-     
-    WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
-    AutoPhrasingTokenFilter aptf = new AutoPhrasingTokenFilter( TEST_VERSION_CURRENT, wt, phraseSets, true );
+        
+    StringReader reader = new StringReader(input);
+    final WhitespaceTokenizer in = new WhitespaceTokenizer( reader );
+        
+    AutoPhrasingTokenFilter aptf = new AutoPhrasingTokenFilter( in, phraseSets, true );
     aptf.setReplaceWhitespaceWith( new Character( '_' ) );
     CharTermAttribute term = aptf.addAttribute(CharTermAttribute.class);
     aptf.reset();
-
-    // printTokens( aptf, term );
-     
+        
     assertTrue(aptf.incrementToken());
     assertEquals( "the", term.toString());
     assertTrue(aptf.incrementToken());
@@ -193,22 +191,21 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
     assertTrue(aptf.incrementToken());
     assertEquals( "new_york", term.toString());
   }
-   
-  public void testOverlappingAtEnd( ) throws Exception {
-    final CharArraySet phraseSets = new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(
-        "new york", "new york city", "city of new york"
-        ), false);
-    	 
-    final String input = "the great city of new york";
     
-    WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
-    AutoPhrasingTokenFilter aptf = new AutoPhrasingTokenFilter( TEST_VERSION_CURRENT, wt, phraseSets, false );
+  public void testOverlappingAtEnd( ) throws Exception {
+    final CharArraySet phraseSets = new CharArraySet( Arrays.asList(
+        "new york", "new york city", "city of new york" ), false);
+        
+    final String input = "the great city of new york";
+        
+    StringReader reader = new StringReader(input);
+    final WhitespaceTokenizer in = new WhitespaceTokenizer( reader );
+        
+    AutoPhrasingTokenFilter aptf = new AutoPhrasingTokenFilter( in, phraseSets, false );
     aptf.setReplaceWhitespaceWith( new Character( '_' ) );
     CharTermAttribute term = aptf.addAttribute(CharTermAttribute.class);
     aptf.reset();
-
-    // printTokens( aptf, term );
-    
+        
     assertTrue(aptf.incrementToken());
     assertEquals( "the", term.toString());
     assertTrue(aptf.incrementToken());
@@ -216,36 +213,27 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
     assertTrue(aptf.incrementToken());
     assertEquals( "city_of_new_york", term.toString());
   }
-   
+    
   public void testIncompletePhrase( ) throws Exception {
-    final CharArraySet phraseSets = new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(
-	    	"big apple", "new york city", "property tax", "three word phrase"
- 	     ), false);
-  	 
+    final CharArraySet phraseSets = new CharArraySet( Arrays.asList(
+        "big apple", "new york city", "property tax", "three word phrase"), false);
+        
     final String input = "some new york";
-  
-    WhitespaceTokenizer wt = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(input));
-    AutoPhrasingTokenFilter aptf = new AutoPhrasingTokenFilter( TEST_VERSION_CURRENT, wt, phraseSets, false );
+        
+    StringReader reader = new StringReader(input);
+    final WhitespaceTokenizer in = new WhitespaceTokenizer( reader );
+        
+    AutoPhrasingTokenFilter aptf = new AutoPhrasingTokenFilter( in, phraseSets, false );
     aptf.setReplaceWhitespaceWith( new Character( '_' ) );
     CharTermAttribute term = aptf.addAttribute(CharTermAttribute.class);
     aptf.reset();
-
-    // printTokens( aptf, term );
-    
+        
     assertTrue(aptf.incrementToken());
     assertEquals( "some", term.toString());
     assertTrue(aptf.incrementToken());
-    assertEquals( "new_york", term.toString());
+    assertEquals( "new", term.toString());
     assertTrue(aptf.incrementToken());
     assertEquals( "york", term.toString());
-  }
-	
-  private void printTokens( AutoPhrasingTokenFilter aptf, CharTermAttribute term ) throws Exception {
-    boolean hasToken = false;
-    do {
-      hasToken = aptf.incrementToken( );
-      if (hasToken) System.out.println( "token:'" + term.toString( ) + "'" );
-    } while (hasToken);
   }
 
 }

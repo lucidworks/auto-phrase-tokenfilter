@@ -41,7 +41,7 @@ public class AutoPhrasingTokenFilterFactory extends TokenFilterFactory implement
 	
   @Override
   public TokenStream create( TokenStream input ) {
-    AutoPhrasingTokenFilter autoPhraseFilter = new AutoPhrasingTokenFilter(luceneMatchVersion, input, phraseSets, emitSingleTokens );
+    AutoPhrasingTokenFilter autoPhraseFilter = new AutoPhrasingTokenFilter( input, phraseSets, emitSingleTokens );
 	if (replaceWhitespaceWith != null) {
 	  autoPhraseFilter.setReplaceWhitespaceWith( new Character( replaceWhitespaceWith.charAt( 0 )) );
 	}
