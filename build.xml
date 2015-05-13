@@ -58,7 +58,7 @@
   <target name="dist" depends="compile,test" description="generate the distribution" >
     <!-- Create the distribution directory -->
     <mkdir dir="${classes.dir}"/>
-    <jar jarfile="${dist.dir}/${project.name}-${version.number}.jar" basedir="${build.dir}"/>
+    <jar jarfile="${dist.dir}/${project.name}-${version.number}.jar" basedir="${classes.dir}"/>
     <!-- Add JavaDocs -->
     
   </target>
