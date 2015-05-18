@@ -89,7 +89,7 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
   @Override
   public final boolean incrementToken() throws IOException {
     if (!emitSingleTokens && unusedTokens.size() > 0) {
-      Log.debug( "emitting unused phrases" );
+      Log.debug( "emitting unused phrases 1" );
       // emit these until the queue is empty before emitting any new stuff
       Token aToken = unusedTokens.remove( 0 );
       emit( aToken );
@@ -97,6 +97,7 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
     }
     
     if (lastToken != null) {
+      Log.debug( "emit lastToken" );
       emit( lastToken );
       lastToken = null;
       return true;
@@ -106,9 +107,10 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
     // if (nextToken != null) System.out.println( "nextToken: " + new String( nextToken ));
     if (nextToken == null) {
       if (lastValid != null) {
-    	  emit( lastValid );
-    	  lastValid = null;
-    	  return true;
+        Log.debug( "emit lastValid" );
+        emit( lastValid );
+        lastValid = null;
+        return true;
       }
 
       if (emitSingleTokens && currentSetToCheck != null && currentSetToCheck.size() > 0) {
@@ -116,26 +118,32 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
       	char[] lastTok = getCurrentBuffer( new char[0] );
       	if (phrase != null && endsWith( lastTok, phrase)) {
       	  currentSetToCheck = remove( currentSetToCheck, phrase );
+          Log.debug( "emit phrase" );
       	  emit( phrase );
       	  return true;
       	}
       }
       else if (!emitSingleTokens && currentSetToCheck != null && currentSetToCheck.size() > 0) {
-    	  if (lastEmitted != null && !equals( fixWhitespace(lastEmitted), getCurrentBuffer(new char[0] ))) {
-            discardCharTokens( currentPhrase, unusedTokens );
-            currentSetToCheck = null;
-            if (unusedTokens.size() > 0) {
-              Token aToken = unusedTokens.remove( 0 );
-              Log.debug( "emitting putback token");
-    	      emit( aToken );
+        char[] currBuff = getCurrentBuffer(new char[0] );
+        if (lastEmitted != null && !equals( fixWhitespace(lastEmitted), currBuff )) {
+          discardCharTokens( currentPhrase, unusedTokens );
+          currentSetToCheck = null;
+          if (unusedTokens.size() > 0) {
+            Token aToken = unusedTokens.remove( 0 );
+            // don't emit if current phrase not completed and overlaps with lastEmitted
+            if (!endsWith( lastEmitted, currBuff )) {
+              Log.debug( "emitting putback token 2");
+              emit( aToken );
               return true;
             }
-    	  }
+          }
+        }
       }
       
       if (lastEmitted == null && (currentPhrase != null && currentPhrase.length() > 0)) {
         char[] lastTok = getCurrentBuffer( new char[0] );
         if (currentSetToCheck.contains( lastTok, 0, lastTok.length )) {
+          Log.debug( "emit lastTok " );
           emit( lastTok );
           currentPhrase.setLength( 0 );
           return true;
@@ -147,7 +155,7 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
           currentPhrase.setLength( 0 );
           if (unusedTokens.size() > 0) {
             Token aToken = unusedTokens.remove( 0 );
-            Log.debug( "emitting putback token");
+            Log.debug( "emitting putback token 3");
     	    emit( aToken );
             return true;
     	  }
@@ -173,6 +181,7 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
         return incrementToken( );
       }
       else {
+        Log.debug( "emit nextToken" );
         emit( nextToken );
         // clear lastToken
         lastToken = null;
@@ -238,6 +247,7 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
       }
       
       if (lastValid != null) {
+        Log.debug( "emit lastValid" );
         emit( lastValid );
         lastValid = null;
         return true;
@@ -252,7 +262,7 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
         
         if (unusedTokens.size() > 0) {
           Token aToken = unusedTokens.remove( 0 );
-          Log.debug( "emitting putback token");
+          Log.debug( "emitting putback token 4" );
           emit( aToken );
 	      return true;
         }
@@ -329,7 +339,7 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
 	
 	
   private void emit( char[] token ) {
-	Log.debug( "emit: " + new String( token ) );
+	System.out.println( "emit: " + new String( token ) );
 	if (replaceWhitespaceWith != null) {
 		token = replaceWhiteSpace( token );
 	}
