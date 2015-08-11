@@ -237,6 +237,81 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
         invokeCreateParser(actual, expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
     }
 
+    public void test60Cc() throws Exception {
+        String actual = "60 cc";
+        String expected = "60cc";
+        invokeCreateParser(actual, expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+    }
+
+    public void test60Ml() throws Exception {
+        String actual = "60 ml";
+        String expected = "60ml";
+        invokeCreateParser(actual, expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+    }
+
+    public void test60Mm() throws Exception {
+        String actual = "60 mm";
+        String expected = "60mm";
+        invokeCreateParser(actual, expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+    }
+
+    public void test60Lb() throws Exception {
+        String expected = "60lb";
+        invokeCreateParser("60 lb", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+        invokeCreateParser("60lb", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+        invokeCreateParser("60 lbs", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+        invokeCreateParser("60lbs", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+        invokeCreateParser("60 pound", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+        invokeCreateParser("60 pounds", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+    }
+
+    public void test60In() throws Exception {
+        String expected = "60in";
+        invokeCreateParser("60 in", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+        invokeCreateParser("60in", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+        invokeCreateParser("60 i", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+        invokeCreateParser("60i", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+        invokeCreateParser("60 inch", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+
+    }
+
+    public void test60Oz() throws Exception {
+        String expected = "60oz";
+        invokeCreateParser("60 oz", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+        invokeCreateParser("60oz", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+        invokeCreateParser("60 ounce", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+        invokeCreateParser("60 ounces", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+
+    }
+
+    public void test60Qt() throws Exception {
+        String expected = "60qt";
+        invokeCreateParser("60 qt", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+        invokeCreateParser("60qt", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+        invokeCreateParser("60 qts", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+        invokeCreateParser("60qts", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+    }
+
+    public void test60Gal() throws Exception {
+        String expected = "60gal";
+        invokeCreateParser("60 gal", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+        invokeCreateParser("60gal", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+        invokeCreateParser("60 ga", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+        invokeCreateParser("60ga", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+        invokeCreateParser("60 gallon", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+        invokeCreateParser("60 gallons", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+    }
+
+    public void test60Yd() throws Exception {
+        String expected = "60yd";
+        invokeCreateParser("60 yd", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+        invokeCreateParser("60yd", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+        invokeCreateParser("60 yds", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+        invokeCreateParser("60yds", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+        invokeCreateParser("60 yard", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+        invokeCreateParser("60 yards", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+    }
+
     public void testCreateParserNullQuery() throws Exception {
         invokeCreateParser(null, null, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
     }
