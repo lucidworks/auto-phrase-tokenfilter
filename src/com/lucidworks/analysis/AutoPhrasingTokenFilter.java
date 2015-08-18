@@ -121,7 +121,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
             //Figure out how many TOKEN options are present, since we these are all optional
             int tokenCount = 0;
             for (int i=0; i<potentialPhraseWords.length; i++) {
-                if ("TOKEN".equals(potentialPhraseWords[i])) {
+                if ("TOKEN?".equalsIgnoreCase(potentialPhraseWords[i])) {
                     tokenCount++;
                 }
             }
@@ -136,11 +136,11 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
             for (int i = 0 ; i < unusedTokens.size() && i < potentialPhraseWords.length  ; ++i) {
                 //If our potential match is "TOKEN", then we need to see if it matches the next "real" word, or
                 //not.  If it does, then continue from the "real" one.  If not, then go with the generic "TOKEN."
-                if ("TOKEN".equals(potentialPhraseWords[i])) {
+                if ("TOKEN?".equalsIgnoreCase(potentialPhraseWords[i])) {
                     String nextRealPotentialPhraseWord = "";
                     int j=i+1;
                     for (; j < potentialPhraseWords.length; j++) {
-                        if (!"TOKEN".equals(potentialPhraseWords[j])) {
+                        if (!"TOKEN?".equalsIgnoreCase(potentialPhraseWords[j])) {
                             nextRealPotentialPhraseWord = potentialPhraseWords[j];
                             break;
                         }
@@ -157,7 +157,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
                 }
             }
             if (matches && (phraseMatch == null || potentialPhraseWordsUsed > phraseWordsUsed)) {
-                potentialPhraseMatch = String.valueOf(potentialPhraseMatch).replaceAll("TOKEN ", "").toCharArray();
+                potentialPhraseMatch = String.valueOf(potentialPhraseMatch).replaceAll("[tT][oO][kK][eE][nN]\\? ", "").toCharArray();
                 LazyLog.logDebug("Found potential longest phrase match for '%s'.", potentialPhraseMatch);
                 phraseMatch = new char[potentialPhraseMatch.length];
                 arraycopy(potentialPhraseMatch, 0, phraseMatch, 0, potentialPhraseMatch.length);

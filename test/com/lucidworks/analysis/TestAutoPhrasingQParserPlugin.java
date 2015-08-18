@@ -237,6 +237,24 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
         invokeCreateParser(actual, expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
     }
 
+    public void testBasicFuzzyMatchInQuery() throws Exception {
+        String actual = "one or two";
+        String expected = "onetwo";
+        invokeCreateParser(actual, expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+    }
+
+    public void testBasicFuzzyMatchTokenOptionalInQuery() throws Exception {
+        String actual = "one two";
+        String expected = "onetwo";
+        invokeCreateParser(actual, expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+    }
+
+    public void testFuzzyMatchDoesNotConsumeMetacharacters() throws Exception {
+        String expected = "one: two";
+        invokeCreateParser("one : two", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+        invokeCreateParser("one: two", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+    }
+
     public void test60Cc() throws Exception {
         String actual = "60 cc";
         String expected = "60cc";
@@ -396,6 +414,7 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
         phrases.add("more than one space");
         phrases.add("dup licate");
         phrases.add("dup licate");
+        phrases.add("one TOKEN? two");
         return phrases;
     }
 

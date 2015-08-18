@@ -409,7 +409,7 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
     }
 
     public void testFuzzyMatchingMultipleTokens() throws Exception {
-        final CharArraySet phrases = getPhraseSets("corn TOKEN TOKEN bread");
+        final CharArraySet phrases = getPhraseSets("corn TOKEN? TOKEN? bread");
         final String input = "corn on my bread";
 
         Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
@@ -421,7 +421,7 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
     }
 
     public void testFuzzyMatchingSingleToken() throws Exception {
-        final CharArraySet phrases = getPhraseSets("corn TOKEN bread");
+        final CharArraySet phrases = getPhraseSets("corn TOKEN? bread");
         final String input = "corn or bread";
 
         Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
@@ -433,7 +433,7 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
     }
 
     public void testFuzzyMatchingTokenOptional() throws Exception {
-        final CharArraySet phrases = getPhraseSets("corn TOKEN bread");
+        final CharArraySet phrases = getPhraseSets("corn TOKEN? bread");
         final String input = "corn bread";
 
         Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
@@ -445,7 +445,7 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
     }
 
     public void testFuzzyMatchingTokenWithMultipleWordsAfter() throws Exception {
-        final CharArraySet phrases = getPhraseSets("first TOKEN second third");
+        final CharArraySet phrases = getPhraseSets("first TOKEN? second third");
         final String input = "first or second third";
 
         Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
@@ -457,7 +457,7 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
     }
 
     public void testFuzzyMatchingOptionalTokenWithMultipleWordsAfter() throws Exception {
-        final CharArraySet phrases = getPhraseSets("first TOKEN second third");
+        final CharArraySet phrases = getPhraseSets("first TOKEN? second third");
         final String input = "first second third";
 
         Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
