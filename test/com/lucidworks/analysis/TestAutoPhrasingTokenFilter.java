@@ -407,4 +407,65 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
                 new int[] {17},
                 new int[] {1});
     }
+
+    public void testFuzzyMatchingMultipleTokens() throws Exception {
+        final CharArraySet phrases = getPhraseSets("corn TOKEN TOKEN bread");
+        final String input = "corn on my bread";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"cornbread"},
+                new int[] {0},
+                new int[] {9},
+                new int[] {1});
+    }
+
+    public void testFuzzyMatchingSingleToken() throws Exception {
+        final CharArraySet phrases = getPhraseSets("corn TOKEN bread");
+        final String input = "corn or bread";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"cornbread"},
+                new int[] {0},
+                new int[] {9},
+                new int[] {1});
+    }
+
+    public void testFuzzyMatchingTokenOptional() throws Exception {
+        final CharArraySet phrases = getPhraseSets("corn TOKEN bread");
+        final String input = "corn bread";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"cornbread"},
+                new int[] {0},
+                new int[] {9},
+                new int[] {1});
+    }
+
+    public void testFuzzyMatchingTokenWithMultipleWordsAfter() throws Exception {
+        final CharArraySet phrases = getPhraseSets("first TOKEN second third");
+        final String input = "first or second third";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"firstsecondthird"},
+                new int[] {0},
+                new int[] {16},
+                new int[] {1});
+    }
+
+    public void testFuzzyMatchingOptionalTokenWithMultipleWordsAfter() throws Exception {
+        final CharArraySet phrases = getPhraseSets("first TOKEN second third");
+        final String input = "first second third";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"firstsecondthird"},
+                new int[] {0},
+                new int[] {16},
+                new int[] {1});
+    }
+
 }

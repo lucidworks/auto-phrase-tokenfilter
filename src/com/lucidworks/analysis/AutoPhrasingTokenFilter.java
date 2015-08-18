@@ -110,33 +110,63 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
 
         //foreach potential phrase match look ahead in the queue and find the first match
         //remove those, make a phrase and emit it
+        //Phrases can be exact, or can have "TOKEN" to represent a (potentially not present) generic token
+        //so that you can match phrases like pay TOKEN bill on "pay bill," "pay my bill," or "pay your bill."
         char[] phraseMatch = null;
-        String[] phraseWords = null;
+        int phraseWordsUsed = 0;
         for (Object aPotentialPhraseMatch : potentialPhraseMatches) {
             char[] potentialPhraseMatch = (char[])aPotentialPhraseMatch;
             String[] potentialPhraseWords = new String(potentialPhraseMatch).split(" ");
 
-            if (potentialPhraseWords.length > unusedTokens.size())
+            //Figure out how many TOKEN options are present, since we these are all optional
+            int tokenCount = 0;
+            for (int i=0; i<potentialPhraseWords.length; i++) {
+                if ("TOKEN".equals(potentialPhraseWords[i])) {
+                    tokenCount++;
+                }
+            }
+
+            //If the number of non-optional words left in the phrase is longer than the number of unused tokens left,
+            //then it's not possible to match, so go to the next check.
+            if (potentialPhraseWords.length - tokenCount > unusedTokens.size())
                 continue;
 
             boolean matches = true;
-            for (int i = 0 ; i < potentialPhraseWords.length ; ++i) {
-                if (!CharArrayUtil.equals(unusedTokens.get(i), potentialPhraseWords[i].toCharArray())) {
+            int potentialPhraseWordsUsed = potentialPhraseWords.length;
+            for (int i = 0 ; i < unusedTokens.size() && i < potentialPhraseWords.length  ; ++i) {
+                //If our potential match is "TOKEN", then we need to see if it matches the next "real" word, or
+                //not.  If it does, then continue from the "real" one.  If not, then go with the generic "TOKEN."
+                if ("TOKEN".equals(potentialPhraseWords[i])) {
+                    String nextRealPotentialPhraseWord = "";
+                    int j=i+1;
+                    for (; j < potentialPhraseWords.length; j++) {
+                        if (!"TOKEN".equals(potentialPhraseWords[j])) {
+                            nextRealPotentialPhraseWord = potentialPhraseWords[j];
+                            break;
+                        }
+                    }
+                    if (CharArrayUtil.equals(unusedTokens.get(i), nextRealPotentialPhraseWord.toCharArray())) {
+                        potentialPhraseWordsUsed -= j-i;
+                        i=j;
+                        continue;
+                    }
+
+                } else if (!CharArrayUtil.equals(unusedTokens.get(i), potentialPhraseWords[i].toCharArray())) {
                     matches = false;
                     break;
                 }
             }
-            if (matches && (phraseMatch == null || potentialPhraseMatch.length > phraseMatch.length)) {
+            if (matches && (phraseMatch == null || potentialPhraseWordsUsed > phraseWordsUsed)) {
+                potentialPhraseMatch = String.valueOf(potentialPhraseMatch).replaceAll("TOKEN ", "").toCharArray();
                 LazyLog.logDebug("Found potential longest phrase match for '%s'.", potentialPhraseMatch);
                 phraseMatch = new char[potentialPhraseMatch.length];
                 arraycopy(potentialPhraseMatch, 0, phraseMatch, 0, potentialPhraseMatch.length);
-                phraseWords = new String[potentialPhraseWords.length];
-                arraycopy(potentialPhraseWords, 0, phraseWords, 0, potentialPhraseWords.length);
+                phraseWordsUsed = potentialPhraseWordsUsed;
             }
         }
         if (phraseMatch != null) {
             LazyLog.logDebug("Found phrase match for '%s'.", phraseMatch);
-            for (String ignored : phraseWords) {
+            for (int i=0; i<phraseWordsUsed; i++) {
                 unusedTokens.remove(0);
             }
 
