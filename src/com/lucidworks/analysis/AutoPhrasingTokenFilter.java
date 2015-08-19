@@ -166,7 +166,7 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
         }
         if (phraseMatch != null) {
             LazyLog.logDebug("Found phrase match for '%s'.", phraseMatch);
-            for (int i=0; i<phraseWordsUsed; i++) {
+            for (int i=0; i<phraseWordsUsed && unusedTokens.size() > 0; i++) {
                 unusedTokens.remove(0);
             }
 
