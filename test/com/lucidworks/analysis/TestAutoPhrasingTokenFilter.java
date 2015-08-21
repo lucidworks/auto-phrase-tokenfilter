@@ -480,4 +480,16 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
 
     }
 
+    public void testEarlyMatchesDoNotOverrideChanges() throws Exception {
+        final CharArraySet phrases = getPhraseSets("one two three");
+        final String input = "one two four";
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"one", "two", "four"},
+                new int[] {0, 4, 8},
+                new int[] {3, 7, 12},
+                new int[] {1, 1, 1});
+
+    }
+
 }

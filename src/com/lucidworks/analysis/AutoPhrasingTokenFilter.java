@@ -189,9 +189,14 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
             }
 
         } else {
-            if (CharArrayUtil.equals(potentialPhraseWords.get(0).toCharArray(), unusedTokens.get(0)))
-                return matches(potentialPhraseWords.subList(1, potentialPhraseWords.size()), unusedTokens.subList(1, unusedTokens.size())) + 1;
-            else
+            if (CharArrayUtil.equals(potentialPhraseWords.get(0).toCharArray(), unusedTokens.get(0))) {
+                int response = matches(potentialPhraseWords.subList(1, potentialPhraseWords.size()), unusedTokens.subList(1, unusedTokens.size()));
+                if (response == -1)
+                    return -1;
+                else
+                    return response + 1;
+
+            } else
                 return -1;
         }
 
