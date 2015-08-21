@@ -249,6 +249,18 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
         invokeCreateParser(actual, expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
     }
 
+    public void testDontEatParenthesis() throws Exception {
+        String actual = "q=( field: wheel chair )";
+        String expected = "q=(field: wheelchair)";
+        invokeCreateParser(actual, expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+    }
+
+    public void testDontEatParenthesisFuzzyMatching() throws Exception {
+        String actual = "q=( field: one two )";
+        String expected = "q=(field: onetwo)";
+        invokeCreateParser(actual, expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+    }
+
     public void testFuzzyMatchDoesNotConsumeMetacharacters() throws Exception {
         String expected = "one: two";
         invokeCreateParser("one : two", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);

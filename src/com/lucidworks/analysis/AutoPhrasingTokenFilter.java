@@ -181,10 +181,12 @@ public final class AutoPhrasingTokenFilter extends TokenFilter {
             int option1 = matches(potentialPhraseWords.subList(1, potentialPhraseWords.size()), unusedTokens);
             //Option 2 is that the TOKEN? consumes something in the unused Tokens list
             int option2 = matches(potentialPhraseWords.subList(1, potentialPhraseWords.size()), unusedTokens.subList(1, unusedTokens.size()));
-            if (option1 < 0 && option2 < 0)
+            if (option1 < 0 && option2 < 0) {
                 return -1;
-            else
-                return option1 > option2 ? option1 + 1 : option2 + 1;
+            } else {
+                //Option 1 is that TOKEN? is skipped, so we don't increment the number of tokens "consumed" if we use Option 1.
+                return option1 > option2 ? option1 : option2 + 1;
+            }
 
         } else {
             if (CharArrayUtil.equals(potentialPhraseWords.get(0).toCharArray(), unusedTokens.get(0)))
