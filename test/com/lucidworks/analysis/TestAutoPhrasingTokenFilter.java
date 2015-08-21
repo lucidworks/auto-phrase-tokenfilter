@@ -468,4 +468,16 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
                 new int[] {1});
     }
 
+    public void testFuzzyMatchingDoesNotPrematurelyEnd() throws Exception {
+        final CharArraySet phrases = getPhraseSets("first TOKEN? TOKEN? TOKEN? second");
+        final String input = "first third fourth fifth";
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"first", "third", "fourth", "fifth"},
+                new int[] {0, 6, 12, 19},
+                new int[] {5, 11, 18, 24},
+                new int[] {1, 1, 1, 1});
+
+    }
+
 }
