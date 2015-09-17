@@ -84,13 +84,13 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
         query = query.replaceAll("\"(\\s|$)", " close_quote` ");
 
         // regular expression queries
-        query = query.replaceAll("(?i)(\\d+)\\s?(pound[s]?|lb[s]?)", "$1lb");
-        query = query.replaceAll("(?i)(\\d+)\\s?(inch(es)?|in?)", "$1in");
-        query = query.replaceAll("(?i)(\\d+)\\s?(ounce[s]?|oz)", "$1oz");
-        query = query.replaceAll("(?i)(\\d+)\\s?(quart[s]?|qt[s]?)", "$1qt");
-        query = query.replaceAll("(?i)(\\d+)\\s?(gallon[s]?|gal?)", "$1gal");
-        query = query.replaceAll("(?i)(\\d+)\\s?(yd[s]?|yard[s]?)", "$1yd");
-        query = query.replaceAll("(?i)(\\d+)\\s?(mm|cc|ml)", "$1$2");
+        query = query.replaceAll("(?i)(\\d+)\\s?(pound[s]?|lb[s]?)\\b", "$1lb");
+        query = query.replaceAll("(?i)(\\d+)\\s?(inch(es)?|in?)\\b", "$1in");
+        query = query.replaceAll("(?i)(\\d+)\\s?(ounce[s]?|oz)\\b", "$1oz");
+        query = query.replaceAll("(?i)(\\d+)\\s?(quart[s]?|qt[s]?)\\b", "$1qt");
+        query = query.replaceAll("(?i)(\\d+)\\s?(gallon[s]?|gal?)\\b", "$1gal");
+        query = query.replaceAll("(?i)(\\d+)\\s?(yd[s]?|yard[s]?)\\b", "$1yd");
+        query = query.replaceAll("(?i)(\\d+)\\s?(mm|cc|ml)\\b", "$1$2");
 
         // autophrase the query
         try {

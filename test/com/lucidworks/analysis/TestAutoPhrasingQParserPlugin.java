@@ -313,6 +313,11 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
         invokeCreateParser("60 yards", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
     }
 
+    public void testProductNumberWordBoundaryBug() throws Exception {
+        String expected = "MDTAB4I33PLD";
+        invokeCreateParser("MDTAB4I33PLD", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+    }
+
     public void testCreateParserNullQuery() throws Exception {
         invokeCreateParser(null, null, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
     }
