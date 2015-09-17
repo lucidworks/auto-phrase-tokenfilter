@@ -272,7 +272,8 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
         invokeCreateParser("60 i", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
         invokeCreateParser("60i", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
         invokeCreateParser("60 inch", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
-
+        invokeCreateParser("60inches", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
+        invokeCreateParser("60 inches", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
     }
 
     public void test60Oz() throws Exception {

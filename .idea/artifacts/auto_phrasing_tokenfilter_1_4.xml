@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" name="auto-phrasing-tokenfilter-1.4">
-    <output-path>$PROJECT_DIR$/out/artifacts/auto_phrasing_tokenfilter_1_4</output-path>
-    <root id="archive" name="auto-phrasing-tokenfilter-1.4.jar">
-      <element id="module-output" name="auto-phrase-tokenfilter" />
-    </root>
-  </artifact>
-</component>

@@ -85,7 +85,7 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
 
         // regular expression queries
         query = query.replaceAll("(?i)(\\d+)\\s?(pound[s]?|lb[s]?)", "$1lb");
-        query = query.replaceAll("(?i)(\\d+)\\s?(inch[es]?|in?)", "$1in");
+        query = query.replaceAll("(?i)(\\d+)\\s?(inch(es)?|in?)", "$1in");
         query = query.replaceAll("(?i)(\\d+)\\s?(ounce[s]?|oz)", "$1oz");
         query = query.replaceAll("(?i)(\\d+)\\s?(quart[s]?|qt[s]?)", "$1qt");
         query = query.replaceAll("(?i)(\\d+)\\s?(gallon[s]?|gal?)", "$1gal");
