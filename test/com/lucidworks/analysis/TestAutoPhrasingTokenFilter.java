@@ -407,4 +407,89 @@ public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
                 new int[] {17},
                 new int[] {1});
     }
+
+    public void testFuzzyMatchingMultipleTokens() throws Exception {
+        final CharArraySet phrases = getPhraseSets("corn TOKEN? TOKEN? bread");
+        final String input = "corn on my bread";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"cornbread"},
+                new int[] {0},
+                new int[] {9},
+                new int[] {1});
+    }
+
+    public void testFuzzyMatchingSingleToken() throws Exception {
+        final CharArraySet phrases = getPhraseSets("corn TOKEN? bread");
+        final String input = "corn or bread";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"cornbread"},
+                new int[] {0},
+                new int[] {9},
+                new int[] {1});
+    }
+
+    public void testFuzzyMatchingTokenOptional() throws Exception {
+        final CharArraySet phrases = getPhraseSets("corn TOKEN? bread");
+        final String input = "corn bread";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"cornbread"},
+                new int[] {0},
+                new int[] {9},
+                new int[] {1});
+    }
+
+    public void testFuzzyMatchingTokenWithMultipleWordsAfter() throws Exception {
+        final CharArraySet phrases = getPhraseSets("first TOKEN? second third");
+        final String input = "first or second third";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"firstsecondthird"},
+                new int[] {0},
+                new int[] {16},
+                new int[] {1});
+    }
+
+    public void testFuzzyMatchingOptionalTokenWithMultipleWordsAfter() throws Exception {
+        final CharArraySet phrases = getPhraseSets("first TOKEN? second third");
+        final String input = "first second third";
+
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"firstsecondthird"},
+                new int[] {0},
+                new int[] {16},
+                new int[] {1});
+    }
+
+    public void testFuzzyMatchingDoesNotPrematurelyEnd() throws Exception {
+        final CharArraySet phrases = getPhraseSets("first TOKEN? TOKEN? TOKEN? second");
+        final String input = "first third fourth fifth";
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"first", "third", "fourth", "fifth"},
+                new int[] {0, 6, 12, 19},
+                new int[] {5, 11, 18, 24},
+                new int[] {1, 1, 1, 1});
+
+    }
+
+    public void testEarlyMatchesDoNotOverrideChanges() throws Exception {
+        final CharArraySet phrases = getPhraseSets("one two three");
+        final String input = "one two four";
+        Analyzer analyzer = new AutoPhrasingAnalyzer(phrases);
+        assertAnalyzesTo(analyzer, input,
+                new String[] {"one", "two", "four"},
+                new int[] {0, 4, 8},
+                new int[] {3, 7, 12},
+                new int[] {1, 1, 1});
+
+    }
+
 }
