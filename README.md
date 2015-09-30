@@ -145,8 +145,8 @@ token:'high'
 
 ##Deployment Procedure:
 
-To build the autophrasing token filter from source code you will need to install Apache Ant (http://ant.apache.org/bindownload.cgi). Install Ant and then in a linux/unix shell or Windows DOS command window, change to the auto-phrase-tokenfilter directory (i.e. where you downloaded this project to) and type: ant
+To build the autophrasing token filter from source code you will need to install Apache Maven (https://maven.apache.org/download.cgi). Install Maven and then in a linux/unix shell or Windows DOS command window, change to the auto-phrase-tokenfilter directory (i.e. where you downloaded this project to) and type: mvn package
 
-Assuming that everything went well( BUILD SUCCESSFUL message from Ant), you will have a Java archive file called auto-phrase-tokenfilter-1.0.jar in the auto-phrase-tokenfilter/dist subdirectory. Copy this file to [solr-home]/lib (you may have to create the /lib folder first). In a typical Solr 4.x install, [solr-home] would be at /example/solr. Then restart Solr.
+Assuming that everything went well( BUILD SUCCESS message from Maven), you will have a Java archive file called auto-phrase-tokenfilter-4.10.3.jar in the auto-phrase-tokenfilter/target subdirectory. Copy this file to [solr-home]/lib (you may have to create the /lib folder first). In a typical Solr 4.x install, [solr-home] would be at /example/solr. Then restart Solr.
 
 The jar file included in this distribution was compiled with Solr 4.10.3 
