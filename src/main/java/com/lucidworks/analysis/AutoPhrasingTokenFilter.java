@@ -174,7 +174,7 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
         	
       if (phraseMap.keySet().contains( nextToken, 0, nextToken.length )) {
         // get the phrase set for this token, add it to currentSetTocheck
-        currentSetToCheck = phraseMap.get(nextToken, 0, nextToken.length );
+        currentSetToCheck = CharArraySet.copy(phraseMap.get(nextToken, 0, nextToken.length ));
         if (currentPhrase == null) currentPhrase = new StringBuffer( );
         else currentPhrase.setLength( 0 );
         currentPhrase.append( nextToken );
@@ -214,7 +214,7 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
 
         if (phraseMap.keySet().contains( nextToken, 0, nextToken.length )) {
           // get the phrase set for this token, add it to currentPhrasesTocheck
-          currentSetToCheck = phraseMap.get(nextToken, 0, nextToken.length );
+          currentSetToCheck = CharArraySet.copy(phraseMap.get(nextToken, 0, nextToken.length ));
           if (currentPhrase == null) currentPhrase = new StringBuffer( );
           else currentPhrase.setLength( 0 );
           currentPhrase.append( nextToken );
