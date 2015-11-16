@@ -68,9 +68,9 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
 
         // logical operators
         if (autoPhrasingParameters.getIgnoreCase()) {
-            query = query.replaceAll("AND", "&&");
-            query = query.replaceAll("OR", "||");
-            query = query.replaceAll("TO", "`to`");
+            query = query.replaceAll(" AND ", " && ");
+            query = query.replaceAll(" OR ", " || ");
+            query = query.replaceAll(" TO ", " `to` ");
             query = query.replaceAll("NOW", "`now`");
         }
 
@@ -105,9 +105,9 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
 
         // restore logical operators
         if (autoPhrasingParameters.getIgnoreCase()) {
-            query = query.replaceAll("&&", "AND");
-            query = query.replaceAll("\\|\\|", "OR");
-            query = query.replaceAll("`to`", "TO");
+            query = query.replaceAll(" && ", " AND ");
+            query = query.replaceAll(" \\|\\| ", " OR ");
+            query = query.replaceAll(" `to` ", " TO ");
             query = query.replaceAll("`now`", "NOW");
         }
 

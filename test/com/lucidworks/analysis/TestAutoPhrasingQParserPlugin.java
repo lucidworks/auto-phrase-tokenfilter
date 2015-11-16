@@ -14,6 +14,7 @@ import org.apache.solr.search.QParserPlugin;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
+import org.mockito.internal.exceptions.ExceptionIncludingMockitoWarnings;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -348,6 +349,11 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
         invokeCreateParser("MDTAB4I33PLD", expected, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
     }
 
+    public void testTomatoJuiceAllCapsBug() throws Exception {
+        String expected = "tomatojuice";
+        invokeCreateParser("TOMATO JUICE", expected, true, EmptyReplaceWhitespaceWith);
+    }
+
     public void testCreateParserNullQuery() throws Exception {
         invokeCreateParser(null, null, DefaultIgnoreCase, EmptyReplaceWhitespaceWith);
     }
@@ -433,6 +439,7 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
         phrases.add("dup licate");
         phrases.add("dup licate");
         phrases.add("one TOKEN? two");
+        phrases.add("tomato juice");
         return phrases;
     }
 
