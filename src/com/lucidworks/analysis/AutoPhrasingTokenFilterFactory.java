@@ -9,7 +9,6 @@ import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 public class AutoPhrasingTokenFilterFactory extends TokenFilterFactory implements ResourceLoaderAware {
@@ -37,8 +36,7 @@ public class AutoPhrasingTokenFilterFactory extends TokenFilterFactory implement
     public TokenStream create(TokenStream input) {
         Character replaceWhitespaceWith = autoPhrasingParameters.getReplaceWhitespaceWith();
 
-        AutoPhrasingTokenFilter autoPhraseFilter = new AutoPhrasingTokenFilter(
-                luceneMatchVersion, input, phraseSets);
+        AutoPhrasingTokenFilter autoPhraseFilter = new AutoPhrasingTokenFilter(input, phraseSets);
         autoPhraseFilter.setReplaceWhitespaceWith(replaceWhitespaceWith);
         return autoPhraseFilter;
     }
