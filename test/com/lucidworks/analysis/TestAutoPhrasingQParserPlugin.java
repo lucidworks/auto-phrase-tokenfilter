@@ -5,7 +5,6 @@ import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.analysis.util.ResourceLoader;
 import org.apache.lucene.analysis.util.WordlistLoader;
-import org.apache.lucene.util.Version;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.core.SolrCore;
@@ -14,7 +13,6 @@ import org.apache.solr.search.QParserPlugin;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
-import org.mockito.internal.exceptions.ExceptionIncludingMockitoWarnings;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -396,7 +394,7 @@ public class TestAutoPhrasingQParserPlugin extends TestCase {
         List<String> expectedPhrases = invokeInform(parser);
 
         CharArraySet actualSet = parser.getPhrases();
-        CharArraySet expectedSet = StopFilter.makeStopSet(Version.LUCENE_48, expectedPhrases, DefaultIgnoreCase);
+        CharArraySet expectedSet = StopFilter.makeStopSet(expectedPhrases, DefaultIgnoreCase);
 
         assertEquals(expectedSet.size(), actualSet.size());
         for (Object anExpected : expectedSet) {

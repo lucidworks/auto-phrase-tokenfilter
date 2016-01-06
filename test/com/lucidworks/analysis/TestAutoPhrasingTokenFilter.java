@@ -9,7 +9,7 @@ import java.util.Arrays;
 public class TestAutoPhrasingTokenFilter extends BaseTokenStreamTestCase {
 
     private static CharArraySet getPhraseSets(String... phrases) {
-        return new CharArraySet(TEST_VERSION_CURRENT, Arrays.asList(phrases), false);
+        return new CharArraySet(Arrays.asList(phrases), false);
     }
 
     public void testNoPhrasesNoReplaceNoInput() throws Exception {

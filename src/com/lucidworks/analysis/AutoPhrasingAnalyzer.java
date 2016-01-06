@@ -4,9 +4,7 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.core.WhitespaceTokenizer;
 import org.apache.lucene.analysis.util.CharArraySet;
-import org.apache.lucene.util.Version;
-
-import java.io.Reader;
+import java.io.StringReader;
 
 /**
  * Implements an Analyzer for the AutoPhrasingTokenFilter to assist in unit testing it
@@ -26,10 +24,11 @@ public class AutoPhrasingAnalyzer extends Analyzer {
     }
 
     @Override
-    protected TokenStreamComponents createComponents(String s, Reader reader) {
-        Tokenizer tokenizer = new WhitespaceTokenizer(Version.LUCENE_48, reader);
+    protected TokenStreamComponents createComponents(String s) {
+        Tokenizer tokenizer = new WhitespaceTokenizer();
+        tokenizer.setReader(new StringReader(s));
         AutoPhrasingTokenFilter tokenFilter =
-                new AutoPhrasingTokenFilter(Version.LUCENE_48, tokenizer, phraseSets);
+                new AutoPhrasingTokenFilter(tokenizer, phraseSets);
         tokenFilter.setReplaceWhitespaceWith(replaceWhitespaceWith);
         return new TokenStreamComponents(tokenizer, tokenFilter);
     }

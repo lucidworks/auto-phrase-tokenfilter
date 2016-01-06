@@ -1,0 +1,16 @@
+<component name="libraryTable">
+  <library name="org.apache.zookeeper:zookeeper:3.4.7" type="repository">
+    <properties maven-id="org.apache.zookeeper:zookeeper:3.4.7" />
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/zookeeper-3.4.7.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/slf4j-api-1.6.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/slf4j-log4j12-1.6.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/log4j-1.2.16.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jline-0.9.94.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/junit-4.8.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/netty-3.7.0.Final.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

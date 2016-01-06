@@ -9,7 +9,6 @@ import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.analysis.util.ResourceLoader;
 import org.apache.lucene.analysis.util.ResourceLoaderAware;
 import org.apache.lucene.analysis.util.WordlistLoader;
-import org.apache.lucene.util.Version;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
@@ -123,13 +122,14 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
     }
 
     private String autophrase(String input) throws IOException {
-        WhitespaceTokenizer wt = new WhitespaceTokenizer(Version.LUCENE_48, new StringReader(input));
+        WhitespaceTokenizer wt = new WhitespaceTokenizer();
+        wt.setReader(new StringReader(input));
         TokenStream ts = wt;
         if (autoPhrasingParameters.getIgnoreCase()) {
-            ts = new LowerCaseFilter(Version.LUCENE_48, wt);
+            ts = new LowerCaseFilter(wt);
         }
         AutoPhrasingTokenFilter autoPhrasingTokenFilter =
-                new AutoPhrasingTokenFilter(Version.LUCENE_48, ts, phraseSets);
+                new AutoPhrasingTokenFilter(ts, phraseSets);
         autoPhrasingTokenFilter.setReplaceWhitespaceWith(autoPhrasingParameters.getReplaceWhitespaceWith());
         CharTermAttribute term = autoPhrasingTokenFilter.addAttribute(CharTermAttribute.class);
         autoPhrasingTokenFilter.reset();
@@ -156,11 +156,10 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
         if (files.size() > 0) {
             // default stop words list has 35 or so words, but maybe don't make it that
             // big to start
-            words = new CharArraySet(Version.LUCENE_48,
-                    files.size() * 10, ignoreCase);
+            words = new CharArraySet(files.size() * 10, ignoreCase);
             for (String file : files) {
                 List<String> stopWords = getLines(loader, file.trim());
-                words.addAll(StopFilter.makeStopSet(Version.LUCENE_48, stopWords, ignoreCase));
+                words.addAll(StopFilter.makeStopSet(stopWords, ignoreCase));
             }
         }
         return words;
