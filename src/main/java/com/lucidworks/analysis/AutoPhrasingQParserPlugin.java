@@ -110,7 +110,9 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
   }
 	
   private String autophrase( String input ) throws IOException {
-    WhitespaceTokenizer wt = new WhitespaceTokenizer(  new StringReader( input ));
+  	
+    WhitespaceTokenizer wt = new WhitespaceTokenizer( );
+    wt.setReader(new StringReader(input));
     TokenStream ts = wt;
     if (ignoreCase) {
       ts = new LowerCaseFilter( wt );
