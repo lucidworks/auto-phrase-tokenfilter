@@ -6,7 +6,7 @@ import java.util.Arrays;
 import junit.framework.TestCase;
 import org.apache.lucene.analysis.core.WhitespaceTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.analysis.util.CharArraySet;
+import org.apache.lucene.analysis.CharArraySet;
 
 public class TestAutoPhrasingTokenFilter extends TestCase {
     
