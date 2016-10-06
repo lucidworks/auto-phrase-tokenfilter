@@ -35,6 +35,8 @@ public class AutoPhrasingTokenFilterFactory extends TokenFilterFactory implement
   public void inform(ResourceLoader loader) throws IOException {
     if (phraseSetFiles != null) {
 	  phraseSets = getWordSet(loader, phraseSetFiles, ignoreCase);
+	  
+	  //System.out.println(phraseSets.toString());
 	}
   }
 	
