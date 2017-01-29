@@ -8,13 +8,13 @@
   </configurations>
 
   <dependencies>
-    <dependency org="org.apache.lucene" name="lucene-analyzers-common" rev="6.3.0" conf="compile->default"/>
-    <dependency org="org.apache.lucene" name="lucene-core" rev="6.3.0" conf="compile->default"/>
-    <dependency org="org.apache.lucene" name="lucene-codecs" rev="6.3.0" conf="compile->default"/>
-    <dependency org="org.apache.lucene" name="lucene-test-framework" rev="6.3.0" conf="test->default"/>
-    <dependency org="org.apache.solr" name="solr-core" rev="6.3.0" conf="compile->default" />
-    <dependency org="org.apache.solr" name="solr-solrj" rev="6.3.0" conf="compile->default" />
-    <dependency org="org.apache.solr" name="solr-test-framework" rev="6.3.0" conf="test->default" />
-    <dependency org="org.slf4j" name="slf4j-api" rev="1.7.21" conf="compile->default"/>
+    <dependency org="org.apache.lucene" name="lucene-analyzers-common" rev="6.4.0" conf="compile->default"/>
+    <dependency org="org.apache.lucene" name="lucene-core" rev="6.4.0" conf="compile->default"/>
+    <dependency org="org.apache.lucene" name="lucene-codecs" rev="6.4.0" conf="compile->default"/>
+    <dependency org="org.apache.lucene" name="lucene-test-framework" rev="6.4.0" conf="test->default"/>
+    <dependency org="org.apache.solr" name="solr-core" rev="6.4.0" conf="compile->default" />
+    <dependency org="org.apache.solr" name="solr-solrj" rev="6.4.0" conf="compile->default" />
+    <dependency org="org.apache.solr" name="solr-test-framework" rev="6.4.0" conf="test->default" />
+    <dependency org="org.slf4j" name="slf4j-api" rev="1.7.22" conf="compile->default"/>
   </dependencies>
 </ivy-module>
