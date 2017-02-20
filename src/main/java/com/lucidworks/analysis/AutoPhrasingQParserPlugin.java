@@ -6,15 +6,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.lucene.analysis.core.StopFilter;
+import org.apache.lucene.analysis.StopFilter;
 import org.apache.lucene.analysis.core.WhitespaceTokenizer;
-import org.apache.lucene.analysis.core.LowerCaseFilter;
+import org.apache.lucene.analysis.LowerCaseFilter;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.util.CharArraySet;
+import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.util.ResourceLoader;
 import org.apache.lucene.analysis.util.ResourceLoaderAware;
-import org.apache.lucene.analysis.util.WordlistLoader;
+import org.apache.lucene.analysis.WordlistLoader;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.util.NamedList;
@@ -110,7 +110,9 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
   }
 	
   private String autophrase( String input ) throws IOException {
-    WhitespaceTokenizer wt = new WhitespaceTokenizer(  new StringReader( input ));
+  	
+    WhitespaceTokenizer wt = new WhitespaceTokenizer( );
+    wt.setReader(new StringReader(input));
     TokenStream ts = wt;
     if (ignoreCase) {
       ts = new LowerCaseFilter( wt );

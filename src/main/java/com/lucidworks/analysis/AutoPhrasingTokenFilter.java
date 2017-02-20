@@ -10,8 +10,8 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
-import org.apache.lucene.analysis.util.CharArraySet;
-import org.apache.lucene.analysis.util.CharArrayMap;
+import org.apache.lucene.analysis.CharArraySet;
+import org.apache.lucene.analysis.CharArrayMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
